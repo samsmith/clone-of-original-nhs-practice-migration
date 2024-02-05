@@ -1,0 +1,100 @@
+@using Hl7.Fhir.Model
+@using GPMigratorApp.GPConnect.Helpers
+@model IEnumerable<GPMigratorApp.DTOs.EncounterDTO>
+@foreach (var encounter in @Model)
+{
+    <dl class="nhsuk-summary-list">
+
+        <div class="nhsuk-summary-list__row">
+            <dt class="nhsuk-summary-list__key">
+                Id
+            </dt>
+            <dd class="nhsuk-summary-list__value">
+                @encounter.Guid
+            </dd>
+        </div>
+        <div class="nhsuk-summary-list__row">
+            <dt class="nhsuk-summary-list__key">
+                Details
+            </dt>
+            <dd class="nhsuk-summary-list__value">
+                @encounter.Type
+            </dd>
+        </div>
+
+        <div class="nhsuk-summary-list__row">
+            <dt class="nhsuk-summary-list__key">
+                Performer
+            </dt>
+            @{
+                <dd class="nhsuk-summary-list__value">
+                    @encounter.Performer?.Title @encounter.Performer?.GivenName
+
+                    @if (encounter.Performer?.MiddleNames is not null)
+                    {
+                        @foreach (var name in @encounter.Performer.MiddleNames)
+                        {
+                            @name
+                        }
+                    }
+
+                    @encounter.Performer?.Surname
+                </dd>
+            }
+        </div>
+        <div class="nhsuk-summary-list__row">
+            <dt class="nhsuk-summary-list__key">
+                Recorder
+            </dt>
+            @{
+                <dd class="nhsuk-summary-list__value">
+                    @encounter.Recorder?.Title @encounter.Recorder?.GivenName
+
+                    @if (encounter.Recorder?.MiddleNames is not null)
+                    {
+                        @foreach (var name in @encounter.Recorder.MiddleNames)
+                        {
+                            @name
+                        }
+                    }
+
+                    @encounter.Recorder?.Surname
+                </dd>
+            }
+        </div>
+        <div class="nhsuk-summary-list__row">
+            <dt class="nhsuk-summary-list__key">
+                Date From
+            </dt>
+            <dd class="nhsuk-summary-list__value">
+                @encounter.PeriodStart.ToString("dd/MM/yyyy hh:mm")
+            </dd>
+        </div>
+        <div class="nhsuk-summary-list__row">
+            <dt class="nhsuk-summary-list__key">
+                Date To
+            </dt>
+            <dd class="nhsuk-summary-list__value">
+                @encounter.PeriodEnd.ToString("dd/MM/yyyy hh:mm")
+            </dd>
+        </div>
+        <div class="nhsuk-summary-list__row">
+            <dt class="nhsuk-summary-list__key">
+                Duration
+            </dt>
+            <dd class="nhsuk-summary-list__value">
+                @encounter.DurationValue @encounter.DurationUnit
+            </dd>
+        </div>
+        <div class="nhsuk-summary-list__row">
+            <dt class="nhsuk-summary-list__key">
+                Status
+            </dt>
+            <dd class="nhsuk-summary-list__value">
+                @encounter.Status
+            </dd>
+        </div>
+
+
+    </dl>
+}

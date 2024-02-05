@@ -1,0 +1,106 @@
+@using Hl7.Fhir.Model
+@using GPMigratorApp.GPConnect.Helpers
+@model GPMigratorApp.DTOs.PatientDTO
+
+<dl class="nhsuk-summary-list">
+
+    <div class="nhsuk-summary-list__row">
+        <dt class="nhsuk-summary-list__key">
+            NHS Number
+        </dt>
+        <dd class="nhsuk-summary-list__value">
+            @Model.NhsNumber - @Model.NHSNumberStatus
+        </dd>
+    </div>
+    <div class="nhsuk-summary-list__row">
+        <dt class="nhsuk-summary-list__key">
+            Name
+        </dt>
+        <dd class="nhsuk-summary-list__value">
+            @Model.Title @Model.GivenName @Model.Surname
+        </dd>
+    </div>
+
+    <div class="nhsuk-summary-list__row">
+        <dt class="nhsuk-summary-list__key">
+            Date of birth
+        </dt>
+        <dd class="nhsuk-summary-list__value">
+            @Model.DateOfBirthUTC
+        </dd>
+    </div>
+    <div class="nhsuk-summary-list__row">
+        <dt class="nhsuk-summary-list__key">
+            Language
+        </dt>
+        <dd class="nhsuk-summary-list__value">
+            @Model.Communication?.FirstOrDefault()?.Language
+        </dd>
+    </div>
+    <div class="nhsuk-summary-list__row">
+        <dt class="nhsuk-summary-list__key">
+            Religion
+        </dt>
+        <dd class="nhsuk-summary-list__value">
+            @Model.Religion
+        </dd>
+    </div>
+    <div class="nhsuk-summary-list__row">
+        <dt class="nhsuk-summary-list__key">
+            Ethnicity
+        </dt>
+        <dd class="nhsuk-summary-list__value">
+            @Model.Ethnicity
+        </dd>
+    </div>
+
+    <div class="nhsuk-summary-list__row">
+        <dt class="nhsuk-summary-list__key">
+            Contact information
+        </dt>
+    </div>
+    <div class="nhsuk-summary-list__row">
+        @if (@Model.HomeAddress is not null)
+        {
+            <dt class="nhsuk-summary-list__key">
+                Home Address
+            </dt>
+            @Html.Partial("Address", @Model.HomeAddress)
+        }
+    </div>
+    @if (@Model.OtherAddresses != null && Model.OtherAddresses.Any())
+    {
+        
+    <div class="nhsuk-summary-list__row">
+        <dt class="nhsuk-summary-list__key">
+            Other Addresses
+        </dt>
+        @foreach (var address in @Model.OtherAddresses)
+        {
+            @Html.Partial("Address", @Model.HomeAddress)
+        }
+    </div>
+    }
+
+
+    <div class="nhsuk-summary-list__row">
+        <dt class="nhsuk-summary-list__key">
+            Contact details
+        </dt>
+        <dd class="nhsuk-summary-list__value">
+           Home Phone - @Model.HomePhone
+           Mobile Phone - @Model.MobilePhone
+           Email - @Model.EmailAddress
+        </dd>
+    </div>
+    <div class="nhsuk-summary-list__row">
+        <dt class="nhsuk-summary-list__key">
+            Registered since
+        </dt>
+        <dd class="nhsuk-summary-list__value">
+            <p>@Model.DateOfRegistrationUTC</p>
+
+        </dd>
+    </div>
+
+</dl>

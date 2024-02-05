@@ -30,7 +30,7 @@ public class GPConnectEncounter
         var dto = new EncounterDTO
         {
             Guid = _encounter.Id,
-            Identifier = DataIdentifier,
+            //Identifier = DataIdentifier,
             Status = _encounter.Status.ToString(),
             Type = TypeText,
             Subject = Patient(),
@@ -50,7 +50,7 @@ public class GPConnectEncounter
     public PatientDTO? Patient()
     {
         var patientId = ReferenceHelper.GetId(_encounter.Subject.Reference);
-        var patient = _patients.FirstOrDefault(x => x.PatientId == patientId);
+        var patient = _patients?.FirstOrDefault(x => x.PatientId == patientId);
         return patient;
     }
     public PracticionerDTO? PrimaryPerformer()

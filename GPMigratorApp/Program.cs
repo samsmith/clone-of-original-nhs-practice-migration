@@ -7,7 +7,7 @@ var builder = WebApplication.CreateBuilder(args);
 var settings = builder.Configuration;
 // Add services to the container.
 
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews().AddRazorRuntimeCompilation();
 builder.Services.Configure<AppSettings>(settings.GetSection("AppSettings"));
 
 builder.Services.AddScoped<IJwtHelper>(
@@ -40,5 +40,4 @@ app.UseAuthorization();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
-
 app.Run();

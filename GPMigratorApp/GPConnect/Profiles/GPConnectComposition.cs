@@ -37,7 +37,7 @@ public class GPConnectComposition
             Status = _composition.Status.ToString(),
             Type = TypeText,
             Class = _composition.Class.Text,
-            Subject = _patients.FirstOrDefault(x=> x.PatientGuid == ReferenceHelper.GetId(_composition.Subject.Reference)),
+            //Subject = _patients.FirstOrDefault(x=> x.PatientGuid == ReferenceHelper.GetId(_composition.Subject.Reference)),
             Encounter = _encounters.FirstOrDefault(x=> x.Guid == ReferenceHelper.GetId(_composition.Encounter.Reference)),
             Author = _practicioners.FirstOrDefault(x=> x.Reference == ReferenceHelper.GetId(_composition.Author.FirstOrDefault()?.Reference ?? string.Empty)),
             Observation = null,

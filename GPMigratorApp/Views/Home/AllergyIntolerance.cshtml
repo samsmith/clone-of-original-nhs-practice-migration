@@ -59,9 +59,9 @@
                 Snomed Details
             </dt>
             <dd class="nhsuk-summary-list__value">
-                Code: @allergy.Code.Coding.FirstOrDefault(x => x.System == "http://snomed.info/sct").Code
+                Code: @allergy.Code.Coding.FirstOrDefault(x => x.System == "http://snomed.info/sct")?.Code
                 <br>
-                Name: @allergy.Code.Coding.FirstOrDefault(x => x.System == "http://snomed.info/sct").Display
+                Name: @allergy.Code.Coding.FirstOrDefault(x => x.System == "http://snomed.info/sct")?.Display
                 <br>
                 Description Id: @allergy.Code.Coding.FirstOrDefault(x => x.System == "http://snomed.info/sct").Extension.FirstOrDefault(x => x.Url == "https://fhir.hl7.org.uk/STU3/StructureDefinition/Extension-coding-sctdescid").Extension.FirstOrDefault().Value
             </dd>

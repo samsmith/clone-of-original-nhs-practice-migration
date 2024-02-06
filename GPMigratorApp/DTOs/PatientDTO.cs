@@ -4,6 +4,10 @@ namespace GPMigratorApp.DTOs;
 
 public class PatientDTO
 {
+    public PatientDTO()
+    {
+    }
+
     public Guid Id { get; set; }
     public string PatientId { get; set; }
     public string OrganisationGuid { get; set; }

@@ -23,7 +23,7 @@ public class GPConnectService : IGPConnectService
     public async Task<FhirResponse> GetLocalFile()
     {
         var path = Directory.GetCurrentDirectory();
-        string text = await File.ReadAllTextAsync(path + "\\example_json\\Shoshana_Daniels.json");
+        string text = await File.ReadAllTextAsync(path + $"{Path.DirectorySeparatorChar}example_json{Path.DirectorySeparatorChar}Shoshana_Daniels.json");
         var jsonParser = new FhirJsonParser();
         var fhirResponse = new FhirResponse();
         
@@ -73,8 +73,9 @@ public class GPConnectService : IGPConnectService
 
             };
 
-            httpRequestMessage.Content.Headers.ContentType =
-                new MediaTypeHeaderValue(ContentType.Application.FhirJson);
+            if (httpRequestMessage.Content != null)
+                httpRequestMessage.Content.Headers.ContentType =
+                    new MediaTypeHeaderValue(ContentType.Application.FhirJson);
 
             var response = await client.SendAsync(httpRequestMessage, HttpCompletionOption.ResponseHeadersRead);
 

@@ -15,12 +15,10 @@
     [Start]                         DATETIME2 (7)    NOT NULL,
     [End]                           DATETIME2 (7)    NOT NULL,
     [MinutesDuration]               INT              NULL,
-    [SlotId]                        UNIQUEIDENTIFIER NOT NULL,
     [Created]                       DATETIME2 (7)    NULL,
     [Comment]                       NVARCHAR (255)   NULL,
     PRIMARY KEY CLUSTERED ([Id] ASC),
     FOREIGN KEY ([BookingOrganizationId]) REFERENCES [dbo].[Organization] ([Id]),
-    FOREIGN KEY ([IdentifierId]) REFERENCES [dbo].[Identifier] ([Id]),
-    FOREIGN KEY ([SlotId]) REFERENCES [dbo].[Slot] ([Id])
+    FOREIGN KEY ([IdentifierId]) REFERENCES [dbo].[Identifier] ([Id])
 );
 

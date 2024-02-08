@@ -28,7 +28,7 @@
     FOREIGN KEY ([IdentifierId]) REFERENCES [dbo].[Identifier] ([Id]),
     FOREIGN KEY ([NoteAuthorId]) REFERENCES [dbo].[Entity] ([Id]),
     FOREIGN KEY ([ParentId]) REFERENCES [dbo].[Specimen] ([Id]),
-    FOREIGN KEY ([SubjectId]) REFERENCES [dbo].[Patient] ([Id]),
+    CONSTRAINT [FK__Specimen__Subjec__6FB49575] FOREIGN KEY ([SubjectId]) REFERENCES [dbo].[Patient] ([Id]),
     CONSTRAINT [FK_Specimen_ProcedureRequest] FOREIGN KEY ([Request]) REFERENCES [dbo].[ProcedureRequest] ([Id])
 );
 

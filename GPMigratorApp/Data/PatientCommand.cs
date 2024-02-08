@@ -53,7 +53,8 @@ public class PatientCommand
                    ,[Religion]
                    ,[NominatedPharmacy])
              VALUES
-                   (@PatientId
+                   (
+                    @PatientId
                    )";
 
             await connection.OpenAsync(cancellationToken);

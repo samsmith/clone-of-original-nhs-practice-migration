@@ -23,8 +23,8 @@
     FOREIGN KEY ([Identifier]) REFERENCES [dbo].[Identifier] ([Id]),
     FOREIGN KEY ([Result]) REFERENCES [dbo].[Observation] ([Id]),
     FOREIGN KEY ([Specimen]) REFERENCES [dbo].[Specimen] ([Id]),
-    FOREIGN KEY ([Subject]) REFERENCES [dbo].[Patient] ([Id]),
     CONSTRAINT [FK__Diagnosti__Perfo__681373AD] FOREIGN KEY ([Performer]) REFERENCES [dbo].[Entity] ([Id]),
+    CONSTRAINT [FK__Diagnosti__Subje__1EA48E88] FOREIGN KEY ([Subject]) REFERENCES [dbo].[Patient] ([Id]),
     CONSTRAINT [FK_DiagnosticReport_ProcedureRequest] FOREIGN KEY ([ProcedureRequest]) REFERENCES [dbo].[ProcedureRequest] ([Id])
 );
 

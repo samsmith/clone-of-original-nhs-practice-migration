@@ -44,8 +44,8 @@
     FOREIGN KEY ([DosageId]) REFERENCES [dbo].[Dosage] ([Id]),
     FOREIGN KEY ([IdentifierId]) REFERENCES [dbo].[Identifier] ([Id]),
     FOREIGN KEY ([LocationId]) REFERENCES [dbo].[Location] ([Id]),
-    FOREIGN KEY ([ProductId]) REFERENCES [dbo].[Medication] ([Id]),
     FOREIGN KEY ([RelatedArtifactId]) REFERENCES [dbo].[Entity] ([Id]),
-    FOREIGN KEY ([TransformId]) REFERENCES [dbo].[StructureMap] ([Id])
+    FOREIGN KEY ([TransformId]) REFERENCES [dbo].[StructureMap] ([Id]),
+    CONSTRAINT [FK__ActivityD__Produ__72C60C4A] FOREIGN KEY ([ProductId]) REFERENCES [dbo].[Medication] ([Id])
 );
 

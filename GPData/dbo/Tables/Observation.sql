@@ -12,7 +12,7 @@
     [PerformerId]       UNIQUEIDENTIFIER NULL,
     PRIMARY KEY CLUSTERED ([Id] ASC),
     FOREIGN KEY ([PerformerId]) REFERENCES [dbo].[Practicioner] ([Id]),
-    FOREIGN KEY ([SubjectId]) REFERENCES [dbo].[Patient] ([Id]),
-    CONSTRAINT [FK__Observati__Conte__534D60F1] FOREIGN KEY ([ContextId]) REFERENCES [dbo].[Encounter] ([Id])
+    CONSTRAINT [FK__Observati__Conte__534D60F1] FOREIGN KEY ([ContextId]) REFERENCES [dbo].[Encounter] ([Id]),
+    CONSTRAINT [FK__Observati__Subje__40F9A68C] FOREIGN KEY ([SubjectId]) REFERENCES [dbo].[Patient] ([Id])
 );
 

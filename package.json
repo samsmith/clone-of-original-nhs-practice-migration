@@ -1,0 +1,12 @@
+{
+	"name": "gpdata",
+	"version": "1.0.0",
+	"description": "This repository contains artefacts pertinent to the development of gpdata",
+	"main": "gulpfile.js",
+	"lint-staged": {
+		"*": "prettier --write"
+	},
+	"dependencies": {
+		"gulp": "4.0.2"
+	}
+}

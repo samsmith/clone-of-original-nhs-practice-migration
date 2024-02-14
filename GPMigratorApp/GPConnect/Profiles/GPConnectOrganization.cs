@@ -27,9 +27,13 @@ public class GPConnectOrganization : Organization
             Name = this.Name,
             Telecom = this.Telecom.FirstOrDefault()?.ValueElement.Value,
             Type = this.TypeName,
-            Address = new AddressDTO(this.Address.FirstOrDefault()),
-            Contact = new ContactDTO(this.Contact.FirstOrDefault())
+
+            
         };
+        if (this.Address.Any())
+            dto.Address = new AddressDTO(this.Address.FirstOrDefault());
+        if (this.Contact.Any())
+            dto.Contact = new ContactDTO(this.Contact.FirstOrDefault());
         if(this.PartOf is not null)
             dto.PartOf = new GPConnectOrganization((Organization) this.PartOf.FirstOrDefault().Value).GetDTO();
         

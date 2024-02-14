@@ -2,6 +2,7 @@ namespace GPMigratorApp.DTOs;
 
 public class OrganizationDTO
 {
+    public Guid Id { get; set; }
     public string ODSCode { get; set; }
     
     public DateTime? PeriodStart { get; set; }
@@ -15,6 +16,7 @@ public class OrganizationDTO
     public AddressDTO? Address { get; set; }
     public OrganizationDTO? PartOf {get; set; }
     public ContactDTO? Contact {get; set; }
+    public Guid EntityId { get; set; }
     
     
     

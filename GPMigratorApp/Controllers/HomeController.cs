@@ -3,7 +3,9 @@ using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 using System.Text.Json;
 using FutureNHS.Api.Configuration;
+using GPMigratorApp.Data;
 using GPMigratorApp.GPConnect;
+using GPMigratorApp.Services.Interfaces;
 using Hl7.Fhir.Model;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.Extensions.Options;
@@ -17,18 +19,21 @@ namespace GPMigratorApp.Controllers
         private readonly ILogger<HomeController> _logger;
         private readonly IGPConnectService _gpConnectService;
         private readonly AppSettings _appSettings;
+        private readonly IStoreRecordService _storeRecordService;
 
         
-        public HomeController(ILogger<HomeController> logger, IOptionsSnapshot<AppSettings> appSettings, IGPConnectService gpConnectService)
+        public HomeController(ILogger<HomeController> logger,IStoreRecordService storeRecordService, IOptionsSnapshot<AppSettings> appSettings, IGPConnectService gpConnectService)
         {
             _logger = logger;
             _gpConnectService = gpConnectService;
             _appSettings = appSettings.Value;
+            _storeRecordService = storeRecordService;
         }
 
         public IActionResult Index()
         {
             var search = new Search();
+            search.NhsNumber = "9690937278";
             return View(search);
         }
         
@@ -38,7 +43,7 @@ namespace GPMigratorApp.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> IndexPost(Search search)
+        public async Task<IActionResult> IndexPost(Search search, CancellationToken cancellationToken)
         {
             var watch = new System.Diagnostics.Stopwatch();
             
@@ -80,6 +85,8 @@ namespace GPMigratorApp.Controllers
             {
                 ViewData.ModelState.AddModelError("NhsNumber", exception.Message);
             }
+
+            await _storeRecordService.StoreRecord(search.Response, cancellationToken);
             watch.Stop();
             search.TimeTaken = watch.ElapsedMilliseconds;
             return View("Index",search);

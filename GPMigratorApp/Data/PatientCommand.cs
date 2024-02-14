@@ -54,7 +54,9 @@ public class PatientCommand
                    ,[NominatedPharmacy])
              VALUES
                    (
-                    @PatientId
+                    @PatientId,
+                    @Organization,
+                    @Active
                    )";
 
             await connection.OpenAsync(cancellationToken);
@@ -62,6 +64,8 @@ public class PatientCommand
             var commandDefinition = new CommandDefinition(insertPatient, new
             {
                 PatientId = patient.PatientId,
+                Organization = patient.ManagingOrganization.ODSCode,
+                @Active = patient.Active
             }, cancellationToken: cancellationToken, transaction: transaction);
             
             var result = await connection.ExecuteScalarAsync<Guid?>(commandDefinition);

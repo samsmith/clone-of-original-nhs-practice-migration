@@ -18,6 +18,7 @@ public class ContactDTO
 
     }
     
+    public Guid Id { get; set; }
     public string? Title { get; }
     public string GivenName { get;}
     public IEnumerable<string>? MiddleNames { get; }

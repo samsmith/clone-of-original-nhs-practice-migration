@@ -5,6 +5,7 @@
     <AddRazorSupportForMvc>true</AddRazorSupportForMvc>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>7eb50f51-39f6-4d53-93dd-6257eb245e6a</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
@@ -24,8 +25,10 @@
     <PackageReference Include="Hl7.FhirPath" Version="4.3.0" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="6.0.26" />
     <PackageReference Include="Microsoft.Data.SqlClient" Version="5.1.1" />
+    <PackageReference Include="Microsoft.Data.Sqlite" Version="8.0.1" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Contracts" Version="5.0.2" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="Polly" Version="8.3.0" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.32.1" />
   </ItemGroup>
 

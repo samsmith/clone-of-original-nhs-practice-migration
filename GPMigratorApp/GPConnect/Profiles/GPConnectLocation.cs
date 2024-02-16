@@ -12,32 +12,35 @@ namespace GPMigratorApp.GPConnect.Profiles;
 [Serializable]
 [DataContract]
 [FhirType("Organization","http://hl7.org/fhir/StructureDefinition/Organization", IsResource=true)]
-public class GPConnectOrganization : Organization
+public class GPConnectLocation : Location
 {
-    public GPConnectOrganization(Organization organization)
+    private readonly IEnumerable<OrganizationDTO> _organizations;
+    public GPConnectLocation(Location organization, IEnumerable<OrganizationDTO> organizations)
     {
         InitInhertedProperties(organization);
+        _organizations = organizations;
     }
 
-    public OrganizationDTO GetDTO()
+    public LocationDTO GetDTO()
     {
-        var dto = new OrganizationDTO
+        var dto = new LocationDTO()
         {
             OriginalId = this.Id,
-            ODSCode = ODSCode(),
+            ODSSiteCode = ODSCode(),
+            Status = this.Status.Value.ToString(),
+            OperationalStatus = this.OperationalStatus.Code,
+            Alias = this.Alias.FirstOrDefault(),
+            Description = this.Description,
             Name = this.Name,
             Telecom = this.Telecom.FirstOrDefault()?.ValueElement.Value,
             Type = this.TypeName,
-
+            PhysicalType = this.PhysicalType.Text,
             
         };
         if (this.Address.Any())
-            dto.Address = new AddressDTO(this.Address.FirstOrDefault());
-        if (this.Contact.Any())
-            dto.Contact = new ContactDTO(this.Contact.FirstOrDefault());
-        if(this.PartOf is not null)
-            dto.PartOf = new GPConnectOrganization((Organization) this.PartOf.FirstOrDefault().Value).GetDTO();
-        
+            dto.Address = new AddressDTO(this.Address);
+        if(this.ManagingOrganization is not null)
+            dto.ManagingOrganization = _organizations.FirstOrDefault(x=> x.OriginalId == ReferenceHelper.GetId(this.ManagingOrganization.Reference));
         return dto;
         
     }

@@ -5,7 +5,10 @@ namespace GPMigratorApp.DTOs;
 
 public class AddressDTO
 {
-
+    public AddressDTO()
+    {
+        
+    }
     public AddressDTO(Address? address)
     {
         if (address is not null)

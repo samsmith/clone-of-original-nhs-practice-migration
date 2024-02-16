@@ -18,85 +18,114 @@ public class OrganizationCommand : IOrganizationCommand
     {
         _connection = connection;
     }
-    
-    
-    public async Task<Guid> PutOrganizationAsync(OrganizationDTO organization, CancellationToken cancellationToken, IDbTransaction transaction)
-        {
-            const string getExisting = 
-                @$"SELECT 
-                    [{{nameof(OrganizationLocation.OrganizationId)}}]             = org.Id,
-                    [{{nameof(OrganizationLocation.OrganizationEntityId)}}]       = org.EntityId,
-                    [{{nameof(OrganizationLocation.LocationId)}}]				  = loc.Id,
-                    [{{nameof(OrganizationLocation.LocationEntityId)}}]			  = loc.EntityId
-				FROM Organization org
-				JOIN Location loc on loc.Id = @LocationODS
-                WHERE LOWER(ODSCode) = LOWER(@ODSCode)
-				";
 
 
-            var organizations = await _connection.QueryAsync<OrganizationLocation>(getExisting, new
+    public async Task<OrganizationDTO?> GetOrganizationAsync(string odsCode, CancellationToken cancellationToken, IDbTransaction transaction)
+    {
+	    string getExisting =
+		    @$"SELECT [{nameof(OrganizationDTO.Id)}]							= org.Id
+                      ,[{nameof(OrganizationDTO.ODSCode)}]                      = org.ODSCode
+                      ,[{nameof(OrganizationDTO.PeriodStart)}]                  = org.PeriodStart
+                      ,[{nameof(OrganizationDTO.PeriodEnd)}]                    = org.PeriodEnd
+                      ,[{nameof(OrganizationDTO.Type)}]                         = org.Type
+                      ,[{nameof(OrganizationDTO.Name)}]                         = org.Name
+                      ,[{nameof(OrganizationDTO.Telecom)}]                      = org.Telecom
+					  ,[{nameof(OrganizationDTO.EntityId)}]                     = org.EntityId
+                      ,[{nameof(LocationDTO.Id)}]							    = loc.Id
+                      ,[{nameof(AddressDTO.Id)}]								= address.Id
+					  ,[{nameof(AddressDTO.Use)}]								= address.[Use]
+					  ,[{nameof(AddressDTO.HouseNameFlatNumber)}]				= address.HouseNameFlatNumber
+					  ,[{nameof(AddressDTO.NumberAndStreet)}]					= address.NumberAndStreet
+					  ,[{nameof(AddressDTO.Village)}]							= address.Village
+					  ,[{nameof(AddressDTO.Town )}]								= address.Town
+					  ,[{nameof(AddressDTO.County )}]							= address.County
+					  ,[{nameof(AddressDTO.Postcode)}]							= address.Postcode
+					  ,[{nameof(AddressDTO.From)}]								= address.[From]
+					  ,[{nameof(AddressDTO.To )}]								= address.[To]
+                      ,[{nameof(OrganizationDTO.Id)}]							= partof.Id
+					  ,[{nameof(OrganizationDTO.Name)}]							= partof.Name
+					  ,[{nameof(OrganizationDTO.ODSCode)}]						= partof.ODSCode
+                      ,[{nameof(ContactDTO.Id)}]								= contact.Id
+					  ,[{nameof(ContactDTO.Title)}]								= contact.Title
+					  ,[{nameof(ContactDTO.GivenName)}]							= contact.GivenName
+					  ,[{nameof(ContactDTO.MiddleNames)}]						= contact.MiddleName
+					  ,[{nameof(ContactDTO.Surname )}]							= contact.Surname
+			          ,[{nameof(AddressDTO.Id)}]								= contactaddress.Id
+					  ,[{nameof(AddressDTO.Use)}]								= contactaddress.[Use]
+					  ,[{nameof(AddressDTO.HouseNameFlatNumber)}]				= contactaddress.HouseNameFlatNumber
+					  ,[{nameof(AddressDTO.NumberAndStreet)}]					= contactaddress.NumberAndStreet
+					  ,[{nameof(AddressDTO.Village)}]							= contactaddress.Village
+					  ,[{nameof(AddressDTO.Town )}]								= contactaddress.Town
+					  ,[{nameof(AddressDTO.County )}]							= contactaddress.County
+					  ,[{nameof(AddressDTO.Postcode)}]							= contactaddress.Postcode
+					  ,[{nameof(AddressDTO.From)}]								= contactaddress.[From]
+					  ,[{nameof(AddressDTO.To )}]								= contactaddress.[To]
+                  FROM [dbo].[Organization] org 
+				  LEFT JOIN [dbo].[Location] loc ON loc.Id = org.MainLocationID
+				  LEFT JOIN [dbo].[Address] address ON address.Id = org.AddressID
+				  LEFT JOIN [dbo].[Organization] partof ON partof.Id = org.PartOfID
+				  LEFT JOIN [dbo].[Contact] contact ON contact.Id = org.ContactID
+				  LEFT JOIN [dbo].[Address] contactaddress ON contactaddress.Id = contact.AddressID
+				  WHERE org.ODSCode = @ODSCode";
+        
+            var reader = await _connection.QueryMultipleAsync(getExisting, new
             {
-                ODSCode = organization.ODSCode,
-                LocationODS = organization.MainLocation?.ODSSiteCode
+                ODSCode = odsCode
             }, transaction: transaction);
-
-            
-                var existingOrg = organizations.FirstOrDefault();
-
-                if (existingOrg is null || !existingOrg.OrganizationId.HasValue)
+            var organizations = reader.Read<OrganizationDTO, LocationDTO, AddressDTO,OrganizationDTO, ContactDTO,AddressDTO,OrganizationDTO>(
+                (organization, location, address, partof, contact, contactaddress) =>
                 {
-                    organization.Id = Guid.NewGuid();
-                    organization.EntityId = Guid.NewGuid();
+                    if (location is not null)
+                    {
+	                    organization.MainLocation = location;
+                    }
                     
-                    var entity = @"INSERT INTO [dbo].[Entity]
+                    if (address is not null)
+                    {
+	                    organization.Address = address;
+                    }
+
+                    if (partof is not null)
+                    {
+	                    organization.PartOf = partof;
+                    }
+                    
+                    if (contact is not null)
+                    {
+	                    organization.Contact = contact;
+	                    if (contactaddress is not null)
+		                    organization.Contact.Address = contactaddress;
+                    }
+
+                    return organization;
+                }, splitOn: $"{nameof(LocationDTO.Id)}, {nameof(AddressDTO.Id)},{nameof(OrganizationDTO.Id)},{nameof(ContactDTO.Id)},{nameof(AddressDTO.Id)}");
+
+            return organizations.FirstOrDefault();
+    }
+    
+    public async Task<Guid> InsertOrganizationAsync(OrganizationDTO organization, CancellationToken cancellationToken, IDbTransaction transaction)
+    {
+        organization.Id = Guid.NewGuid();
+        organization.EntityId = Guid.NewGuid();
+                    
+        var entity = @"INSERT INTO [dbo].[Entity]
                         ([Id],
                         [EntityType])
                     VALUES
                         (@Id,
                         @Type)";
                     
-                    var entityDefinition = new CommandDefinition(entity, new
-                    {
-                        Id = organization.EntityId,
-                        Type = EntityTypes.Organization,
-                    }, cancellationToken: cancellationToken, transaction: transaction);
+        var entityDefinition = new CommandDefinition(entity, new
+        {
+            Id = organization.EntityId,
+            Type = EntityTypes.Organization,
+        }, cancellationToken: cancellationToken, transaction: transaction);
                     
-                    await _connection.ExecuteAsync(entityDefinition);
-                }
-                else
-                {
-                    organization.Id = existingOrg.OrganizationId.Value;
-                    organization.EntityId = existingOrg.OrganizationEntityId.Value;
-                }
-
-                if (existingOrg?.LocationId != null && organization.MainLocation is not null)
-                {
-                    organization.MainLocation.Id = existingOrg.LocationId.Value;
-                    organization.MainLocation.EntityId = existingOrg.LocationEntityId.Value;
-                }
-                else if (existingOrg is {LocationId: null} && organization.MainLocation is not null)
-                {
-                    organization.MainLocation.Id = Guid.NewGuid();
-                    organization.MainLocation.EntityId = Guid.NewGuid();
-                    var entity = @"INSERT INTO [dbo].[Entity]
-                        ([Id],
-                        [EntityType])
-                    VALUES
-                        (@Id,
-                        @Type)";
-                    
-                    var entityDefinition = new CommandDefinition(entity, new
-                    {
-                        Id = organization.EntityId,
-                        Type = EntityTypes.Location,
-                    }, cancellationToken: cancellationToken, transaction: transaction);
-                    
-                    await _connection.ExecuteAsync(entityDefinition);
-                }
-
-                organization.Address.Id = Guid.NewGuid();
+        await _connection.ExecuteAsync(entityDefinition);
+        
+        organization.Address.Id = Guid.NewGuid();
                 
-                var address = @"INSERT INTO [dbo].[Address]
+        var address = @"INSERT INTO [dbo].[Address]
                        ([Id]
                        ,[Use]
                        ,[HouseNameFlatNumber]
@@ -119,50 +148,22 @@ public class OrganizationCommand : IOrganizationCommand
                        ,@From
                        ,@To)";
                     
-                var organizationAddressDefinition = new CommandDefinition(address, new
-                {
-                    Id = organization.Address.Id,
-                    Use = organization.Address.Use,
-                    HouseName = organization.Address.HouseNameFlatNumber,
-                    Number = organization.Address.NumberAndStreet,
-                    Village = organization.Address.Village,
-                    Town = organization.Address.Town,
-                    County = organization.Address.County,
-                    Postcode = organization.Address.Postcode,
-                    From = organization.Address.From,
-                    To = organization.Address.To
-                }, cancellationToken: cancellationToken, transaction: transaction);
+        var organizationAddressDefinition = new CommandDefinition(address, new
+        {
+            Id = organization.Address.Id,
+            Use = organization.Address.Use,
+            HouseName = organization.Address.HouseNameFlatNumber,
+            Number = organization.Address.NumberAndStreet,
+            Village = organization.Address.Village,
+            Town = organization.Address.Town,
+            County = organization.Address.County,
+            Postcode = organization.Address.Postcode,
+            From = organization.Address.From,
+            To = organization.Address.To
+        }, cancellationToken: cancellationToken, transaction: transaction);
                 
-                await _connection.ExecuteAsync(organizationAddressDefinition);
-                
-                if (organization.MainLocation is not null)
-                    
-                {   organization.MainLocation.Address.Id = Guid.NewGuid();
-                    
-                    var LocationAddressDefinition = new CommandDefinition(address, new
-                    {
-                        Id = organization.MainLocation.Address.Id,
-                        Use = organization.MainLocation.Address.Use,
-                        HouseName = organization.MainLocation.Address.HouseNameFlatNumber,
-                        Number = organization.MainLocation.Address.NumberAndStreet,
-                        Village = organization.MainLocation.Address.Village,
-                        Town = organization.MainLocation.Address.Town,
-                        County = organization.MainLocation.Address.County,
-                        Postcode = organization.MainLocation.Address.Postcode,
-                        From = organization.MainLocation.Address.From,
-                        To = organization.MainLocation.Address.To
-                    }, cancellationToken: cancellationToken, transaction: transaction);
-                    await _connection.ExecuteAsync(LocationAddressDefinition);
-                    
-                    return await InsertOrganizationLocation(organization, cancellationToken, transaction);
-                }
-                return await InsertOrganization(organization, cancellationToken, transaction);
-                
-        }
-
-    
-    private async Task<Guid> InsertOrganization(OrganizationDTO organization, CancellationToken cancellationToken, IDbTransaction transaction)
-    {
+        await _connection.ExecuteAsync(organizationAddressDefinition);
+        
          const string insertOrganization =
                 @"INSERT INTO [dbo].[Organization]
                        ([Id],
@@ -216,70 +217,26 @@ public class OrganizationCommand : IOrganizationCommand
 
             return organization.Id;
     }
-    private async Task<Guid> InsertOrganizationLocation(OrganizationDTO organization, CancellationToken cancellationToken, IDbTransaction transaction)
+    public async Task<Guid> UpdateOrganizationAsync(OrganizationDTO organization, CancellationToken cancellationToken, IDbTransaction transaction)
     {
-         const string insertOrganization =
-                @"INSERT INTO [dbo].[Organization]
-                       ([Id],
-                       [ODSCode],
-                       [PeriodStart],
-                       [PeriodEnd],
-                       [Type],
-                       [Name],
-                       [Telecom],
-                       [MainLocationID],
-                       [AddressID],
-                       [PartOfID],
-                       [ContactID],
-                       [EntityId])
-                 VALUES
-                       (@Id,
-                       @ODSCode,
-                       @PeriodStart,
-                       @PeriodEnd,
-                       @Type,
-                       @Name,
-                       @Telecom,
-                       @MainLocation,
-                       @AddressId,
-                       @PartOf,
-                       @Contact,
-                       @EntityId)
-                       
-                INSERT INTO [dbo].[Location]
-                       ([Id],
-                       [ODSSiteCodeID],
-                       [Status],
-                       [OperationalStatus],
-                       [Name],
-                       [Alias],
-                       [Description],
-                       [Type],
-                       [Telecom],
-                       [AddressID],
-                       [PhysicalType],
-                       [ManagingOrganizationID],
-                       [PartOfID],
-                       [EntityId])
-                 VALUES
-                       (@LocationId,
-                       @ODSSiteCode,
-                       @LocationStatus,
-                       @OperationalStatus,
-                       @LocationName,
-                       @Alias,
-                       @Description,
-                       @LocationType,
-                       @LocationTelecom,
-                       @LocationAddressId,
-                       @PhysicalType,
-                       @ManagingOrganizationID,
-                       @PartOfId,
-                       @LocationEntityId)";
+         const string updateOrganization =
+                @"UPDATE [dbo].[Organization]
+				  SET
+                       [ODSCode] = @ODSCode,
+                       [PeriodStart] = @PeriodStart,
+                       [PeriodEnd] = @PeriodEnd,
+                       [Type] = @Type,
+                       [Name] = @Name,
+                       [Telecom] = @Telecom,
+                       [MainLocationID] = @MainLocation,
+                       [AddressID] = @AddressId,
+                       [PartOfID] = @PartOf,
+                       [ContactID] = @Contact
+                 WHERE Id = @Id";
             
-            var commandDefinition = new CommandDefinition(insertOrganization, new
+            var commandDefinition = new CommandDefinition(updateOrganization, new
             {
-                Id = organization.Id,
+	            Id = organization.Id,
                 ODSCode = organization.ODSCode,
                 PeriodStart = organization.PeriodStart,
                 PeriodEnd = organization.PeriodEnd,
@@ -290,21 +247,6 @@ public class OrganizationCommand : IOrganizationCommand
                 AddressId = organization.Address?.Id,
                 PartOf = organization.PartOf?.Id,
                 Contact = organization.Contact?.Id,
-                EntityId = organization.EntityId,
-                LocationId = organization.MainLocation?.Id,
-                ODSSiteCode = organization.MainLocation?.ODSSiteCode,
-                LocationStatus = organization.MainLocation?.Status,
-                OperationalStatus = organization.MainLocation?.OperationalStatus,
-                LocationName = organization.MainLocation?.Name,
-                Alias = organization.MainLocation?.Alias,
-                Description = organization.MainLocation?.Description,
-                LocationType = organization.MainLocation?.Type,
-                LocationTelecom = organization.MainLocation?.Telecom,
-                LocationAddressId = organization.MainLocation?.Address?.Id,
-                PhysicalType = organization.MainLocation?.PhysicalType,
-                ManagingOrganizationID = organization.Id,
-                PartOfId = organization.MainLocation?.PartOf?.Id,
-                LocationEntityId = organization.MainLocation?.EntityId
                 
             }, cancellationToken: cancellationToken, transaction: transaction);
             

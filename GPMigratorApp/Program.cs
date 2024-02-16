@@ -44,6 +44,8 @@ builder.Services.AddScoped<IAzureSqlDbConnectionFactory>(
 //builder.Services.AddScoped<IJwtHelper, JwtHelper>();
 builder.Services.AddScoped<IStoreRecordService, StoreRecordService>();
 builder.Services.AddScoped<IGPConnectService, GPConnectService>();
+builder.Services.AddScoped<IOrganizationService, OrganizationService>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

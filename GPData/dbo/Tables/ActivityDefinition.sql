@@ -43,9 +43,9 @@
     PRIMARY KEY CLUSTERED ([Id] ASC),
     FOREIGN KEY ([DosageId]) REFERENCES [dbo].[Dosage] ([Id]),
     FOREIGN KEY ([IdentifierId]) REFERENCES [dbo].[Identifier] ([Id]),
-    FOREIGN KEY ([LocationId]) REFERENCES [dbo].[Location] ([Id]),
     FOREIGN KEY ([RelatedArtifactId]) REFERENCES [dbo].[Entity] ([Id]),
     FOREIGN KEY ([TransformId]) REFERENCES [dbo].[StructureMap] ([Id]),
+    CONSTRAINT [FK__ActivityD__Locat__0C85DE4D] FOREIGN KEY ([LocationId]) REFERENCES [dbo].[Location] ([Id]),
     CONSTRAINT [FK__ActivityD__Produ__72C60C4A] FOREIGN KEY ([ProductId]) REFERENCES [dbo].[Medication] ([Id])
 );
 

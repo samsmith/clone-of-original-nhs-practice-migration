@@ -9,7 +9,7 @@
     [AssignerID] UNIQUEIDENTIFIER NULL,
     [IssuerID]   UNIQUEIDENTIFIER NULL,
     PRIMARY KEY CLUSTERED ([Id] ASC),
-    FOREIGN KEY ([AssignerID]) REFERENCES [dbo].[Organization] ([Id]),
-    FOREIGN KEY ([IssuerID]) REFERENCES [dbo].[Organization] ([Id])
+    CONSTRAINT [FK__Qualifica__Assig__76619304] FOREIGN KEY ([AssignerID]) REFERENCES [dbo].[Organization] ([Id]),
+    CONSTRAINT [FK__Qualifica__Issue__756D6ECB] FOREIGN KEY ([IssuerID]) REFERENCES [dbo].[Organization] ([Id])
 );
 

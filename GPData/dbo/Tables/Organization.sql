@@ -10,10 +10,11 @@
     [AddressID]      UNIQUEIDENTIFIER NULL,
     [PartOfID]       UNIQUEIDENTIFIER NULL,
     [ContactID]      UNIQUEIDENTIFIER NULL,
-    PRIMARY KEY CLUSTERED ([Id] ASC),
-    FOREIGN KEY ([AddressID]) REFERENCES [dbo].[Address] ([Id]),
-    FOREIGN KEY ([ContactID]) REFERENCES [dbo].[Contact] ([Id]),
-    FOREIGN KEY ([PartOfID]) REFERENCES [dbo].[Organization] ([Id]),
+    [EntityId]       UNIQUEIDENTIFIER NOT NULL,
+    CONSTRAINT [PK__Organiza__3214EC07861ED8BE] PRIMARY KEY CLUSTERED ([Id] ASC),
+    CONSTRAINT [FK__Organizat__Addre__5AB9788F] FOREIGN KEY ([AddressID]) REFERENCES [dbo].[Address] ([Id]),
+    CONSTRAINT [FK__Organizat__Conta__5CA1C101] FOREIGN KEY ([ContactID]) REFERENCES [dbo].[Contact] ([Id]),
+    CONSTRAINT [FK__Organizat__PartO__5BAD9CC8] FOREIGN KEY ([PartOfID]) REFERENCES [dbo].[Organization] ([Id]),
     CONSTRAINT [FK_Organization_Location] FOREIGN KEY ([MainLocationID]) REFERENCES [dbo].[Location] ([Id])
 );
 

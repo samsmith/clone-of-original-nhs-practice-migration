@@ -20,8 +20,7 @@ namespace GPConnect.Provider.AcceptanceTests.Http
         public IEnumerable<PatientDTO> Patients => GetResources<Patient>(ResourceType.Patient).Select(x=> new GPConnectPatient(x).GetDTO());
         public List<Composition> Compositions => GetResources<Composition>(ResourceType.Composition);
         public List<Device> Devices => GetResources<Device>(ResourceType.Device);
-
-        public List<Location> Locations => GetResources<Location>(ResourceType.Location);
+        
         public Bundle Bundle => (Bundle)Resource;
         public List<Slot> Slots => GetResources<Slot>(ResourceType.Slot);
         public List<Appointment> Appointments => GetResources<Appointment>(ResourceType.Appointment);
@@ -36,8 +35,10 @@ namespace GPConnect.Provider.AcceptanceTests.Http
         public List<EpisodeOfCare> EpisodesOfCare => GetResources<EpisodeOfCare>(ResourceType.EpisodeOfCare);
         public IEnumerable<EncounterDTO> Encounters => GetResources<Encounter>(ResourceType.Encounter).Select(x=> new GPConnectEncounter(x, this).GetDTO());
         public IEnumerable<OrganizationDTO> Organizations => GetResources<Organization>(ResourceType.Organization).Select(x=> new GPConnectOrganization(x).GetDTO());
-                public List<List> Lists => GetResources<List>(ResourceType.List);
+        public IEnumerable<LocationDTO> Locations => GetResources<Location>(ResourceType.Location).Select(x=> new GPConnectLocation(x,Organizations).GetDTO());
+        public List<List> Lists => GetResources<List>(ResourceType.List);
         public IEnumerable<PracticionerDTO> Practitioners => GetResources<Practitioner>(ResourceType.Practitioner).Select(x=> new GPConnectPracticioner(x,Organizations).GetDTO());
+        public IEnumerable<PracticionerRoleDTO> PractitionerRoles => GetResources<PractitionerRole>(ResourceType.PractitionerRole).Select(x=> new GPConnectPracticionerRole(x,Organizations,Practitioners,Locations).GetDTO());
 
         private List<T> GetResources<T>(ResourceType resourceType) where T : Resource
         {

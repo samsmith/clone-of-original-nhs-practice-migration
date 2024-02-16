@@ -10,22 +10,35 @@ namespace GPMigratorApp.Services;
 public class StoreRecordService: IStoreRecordService
 {
     private readonly IAzureSqlDbConnectionFactory _connectionFactory;
+    private readonly IOrganizationService _organizationService;
     
-    public StoreRecordService(IAzureSqlDbConnectionFactory connectionFactory)
+    public StoreRecordService(IAzureSqlDbConnectionFactory connectionFactory, IOrganizationService organizationService)
     {
         _connectionFactory = connectionFactory;
+        _organizationService = organizationService;
     }
     
     public async Task StoreRecord(FhirResponse fhirResponse, CancellationToken cancellationToken)
-    { 
-        var connection = await _connectionFactory.GetReadWriteConnectionAsync(cancellationToken);
+    {
+        using var connection = await _connectionFactory.GetReadWriteConnectionAsync(cancellationToken);
         connection.Open();
         var transaction = connection.BeginTransaction();
-        var organizationCommand = new OrganizationCommand(connection);
-        foreach (var organization in fhirResponse.Organizations)
+        try
         {
-           await organizationCommand.PutOrganizationAsync(organization, cancellationToken,transaction);
+         
+            var organizationCommand = new OrganizationCommand(connection);
+            foreach (var organization in fhirResponse.Organizations)
+            {
+                await _organizationService.PutOrganizations(fhirResponse.Organizations, connection, transaction,
+                    cancellationToken);
+            }
+
+            transaction.Commit();
         }
-        transaction.Commit();
+        catch (Exception ex)
+        {
+            transaction.Rollback();
+            connection.Dispose();
+        }
     }
 }

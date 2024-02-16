@@ -3,6 +3,7 @@ namespace GPMigratorApp.DTOs;
 public class LocationDTO
 {
     public Guid Id { get; set; }
+    public string OriginalId{ get; set; }
     public string ODSSiteCode { get; set; }
     public string? Status { get; set; }
     public string? OperationalStatus { get; set; }

@@ -18,7 +18,7 @@
     [Created]                       DATETIME2 (7)    NULL,
     [Comment]                       NVARCHAR (255)   NULL,
     PRIMARY KEY CLUSTERED ([Id] ASC),
-    FOREIGN KEY ([BookingOrganizationId]) REFERENCES [dbo].[Organization] ([Id]),
-    FOREIGN KEY ([IdentifierId]) REFERENCES [dbo].[Identifier] ([Id])
+    FOREIGN KEY ([IdentifierId]) REFERENCES [dbo].[Identifier] ([Id]),
+    CONSTRAINT [FK__Appointme__Booki__17036CC0] FOREIGN KEY ([BookingOrganizationId]) REFERENCES [dbo].[Organization] ([Id])
 );
 

@@ -59,9 +59,6 @@ namespace GPMigratorApp.Controllers
             if (search.NhsNumber == "9465698490")
             {
                 search.Response = await _gpConnectService.GetLocalFile();
-                watch.Stop();
-                search.TimeTaken = watch.ElapsedMilliseconds;
-                return View("Index",search);
             }
 
 
@@ -72,18 +69,21 @@ namespace GPMigratorApp.Controllers
             
             string jsonString = JsonSerializer.Serialize(request);
 
-            try
+            if (search.NhsNumber != "9465698490")
             {
-                var result = await _gpConnectService.SendRequestAsync(HttpMethod.Post,
-                    "/Patient/$gpc.getstructuredrecord", Guid.NewGuid().ToString(), _appSettings.ConsumerASID,
-                    _appSettings.ProviderASID, JsonContent.Create(request));
+                try
+                {
+                    var result = await _gpConnectService.SendRequestAsync(HttpMethod.Post,
+                        "/Patient/$gpc.getstructuredrecord", Guid.NewGuid().ToString(), _appSettings.ConsumerASID,
+                        _appSettings.ProviderASID, JsonContent.Create(request));
 
-                search.Request = request;
-                search.Response = result;
-            }
-            catch (BadHttpRequestException exception)
-            {
-                ViewData.ModelState.AddModelError("NhsNumber", exception.Message);
+                    search.Request = request;
+                    search.Response = result;
+                }
+                catch (BadHttpRequestException exception)
+                {
+                    ViewData.ModelState.AddModelError("NhsNumber", exception.Message);
+                }
             }
 
             await _storeRecordService.StoreRecord(search.Response, cancellationToken);

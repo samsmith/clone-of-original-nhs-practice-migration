@@ -40,12 +40,15 @@
                 @org.Type
             </dd>
         </div>
-        <div class="nhsuk-summary-list__row">
-            <dt class="nhsuk-summary-list__key">
-                Address
-            </dt>
-            @Html.Partial("Address", @org.Address)
-        </div>
+         @if (@org.Address is not null)
+         {
+             <div class="nhsuk-summary-list__row">
+                 <dt class="nhsuk-summary-list__key">
+                     Address
+                 </dt>
+                 @Html.Partial("Address", @org.Address)
+             </div>
+         }
         @if (@org.PartOf is not null)
         {
             <div class="nhsuk-summary-list__row">

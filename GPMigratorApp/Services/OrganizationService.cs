@@ -5,6 +5,7 @@ using GPMigratorApp.Data.Database.Providers.Interfaces;
 using GPMigratorApp.Data.Interfaces;
 using GPMigratorApp.DTOs;
 using GPMigratorApp.Services.Interfaces;
+using Microsoft.IdentityModel.Tokens;
 
 namespace GPMigratorApp.Services;
 
@@ -19,7 +20,7 @@ public class OrganizationService: IOrganizationService
     public async Task PutOrganizations(IEnumerable<OrganizationDTO> organizations,IDbConnection connection, IDbTransaction transaction, CancellationToken cancellationToken)
     { 
         var organizationCommand = new OrganizationCommand(connection);
-        foreach (var organization in organizations)
+        foreach (var organization in organizations.Where(x=> !x.ODSCode.IsNullOrEmpty()))
         {
             var existingRecord = await organizationCommand.GetOrganizationAsync(organization.ODSCode, cancellationToken, transaction);
             if (existingRecord is null)

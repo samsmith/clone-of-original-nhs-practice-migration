@@ -97,7 +97,7 @@ const deployGPDataDatabase = (done) => {
         '/Action:Publish',
         `/SourceFile:GPData/bin/Debug/GPData.dacpac`,
         '/TargetDatabaseName:GPData',
-        '/TargetServerName:localhost\\GPData',
+        '/TargetServerName:localhost',
         '/TargetUser:sa',
         '/TargetPassword:9um#Qu&6d3t5',
         `/DeployReportPath:GPData/Report.xml`,

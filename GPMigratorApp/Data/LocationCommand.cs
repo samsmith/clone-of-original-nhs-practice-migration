@@ -10,17 +10,17 @@ using Microsoft.Data.SqlClient;
 
 namespace GPMigratorApp.Data;
 
-public class OrganizationCommand : IOrganizationCommand
+public class LocationCommand : IOrganizationCommand
 {
     private readonly IDbConnection _connection;
     
-    public OrganizationCommand(IDbConnection connection)
+    public LocationCommand(IDbConnection connection)
     {
         _connection = connection;
     }
 
 
-    public async Task<OrganizationDTO?> GetOrganizationAsync(string odsCode, CancellationToken cancellationToken, IDbTransaction transaction)
+    public async Task<OrganizationDTO?> GetLocationAsync(string odsCode, CancellationToken cancellationToken, IDbTransaction transaction)
     {
 	    string getExisting =
 		    @$"SELECT [{nameof(OrganizationDTO.Id)}]							= org.Id

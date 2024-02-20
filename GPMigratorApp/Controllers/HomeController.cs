@@ -33,7 +33,7 @@ namespace GPMigratorApp.Controllers
         public IActionResult Index()
         {
             var search = new Search();
-            search.NhsNumber = "9690937278";
+            search.NhsNumber = "9465698490";
             return View(search);
         }
         

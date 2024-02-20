@@ -1,5 +1,6 @@
 ﻿CREATE TABLE [dbo].[Organization] (
     [Id]             UNIQUEIDENTIFIER NOT NULL,
+    [OriginalId]     NVARCHAR (255)   NOT NULL,
     [ODSCode]        NVARCHAR (20)    NOT NULL,
     [PeriodStart]    DATETIME         NULL,
     [PeriodEnd]      DATETIME         NULL,

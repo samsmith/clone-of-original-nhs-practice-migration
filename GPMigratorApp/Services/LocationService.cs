@@ -9,7 +9,7 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace GPMigratorApp.Services;
 
-public class LocationService: IOrganizationService
+public class LocationService: ILocationService
 {
     
     public LocationService()
@@ -19,13 +19,13 @@ public class LocationService: IOrganizationService
     
     public async Task PutLocations(IEnumerable<LocationDTO> locations,IDbConnection connection, IDbTransaction transaction, CancellationToken cancellationToken)
     { 
-        var organizationCommand = new OrganizationCommand(connection);
-        foreach (var location in locations.Where(x=> !x.ODSSiteCode.IsNullOrEmpty()))
+        var locationCommand = new LocationCommand(connection);
+        foreach (var location in locations)
         {
-            var existingRecord = await organizationCommand.GetOrganizationAsync(location.ODSSiteCode, cancellationToken, transaction);
+            var existingRecord = await locationCommand.GetLocationAsync(location.OriginalId, cancellationToken, transaction);
             if (existingRecord is null)
             {
-                await organizationCommand.InsertOrganizationAsync(location, cancellationToken,transaction);
+                await locationCommand.InsertLocationAsync(location, cancellationToken,transaction);
             }
             else
             {
@@ -34,18 +34,17 @@ public class LocationService: IOrganizationService
                     location.Address.Id = existingRecord.Address.Id;
                 }
 
-                existingRecord.ODSCode = location.ODSCode;
-                existingRecord.PeriodStart = location.PeriodStart;
-                existingRecord.PeriodEnd = location.PeriodEnd;
-                existingRecord.Type = location.Type;
+                existingRecord.ODSSiteCode = location.ODSSiteCode;
+                existingRecord.Status = location.Status;
+                existingRecord.OperationalStatus = location.OperationalStatus;
                 existingRecord.Name = location.Name;
-                existingRecord.MainLocation = location.MainLocation;
-                existingRecord.Address = location.Address;
+                existingRecord.Alias = location.Alias;
+                existingRecord.Description = location.Description;
+                existingRecord.Type = location.Type;
+                existingRecord.Telecom = location.Telecom;
+                existingRecord.PhysicalType = location.PhysicalType;
 
-                existingRecord.PartOf = location.PartOf;
-                existingRecord.Contact = location.Contact;
-                
-                await organizationCommand.UpdateOrganizationAsync(existingRecord, cancellationToken, transaction);
+                await locationCommand.UpdateLocationAsync(existingRecord, cancellationToken, transaction);
             }
         }
     }

@@ -45,6 +45,8 @@ builder.Services.AddScoped<IAzureSqlDbConnectionFactory>(
 builder.Services.AddScoped<IStoreRecordService, StoreRecordService>();
 builder.Services.AddScoped<IGPConnectService, GPConnectService>();
 builder.Services.AddScoped<IOrganizationService, OrganizationService>();
+builder.Services.AddScoped<ILocationService, LocationService>();
+builder.Services.AddScoped<IPracticionerService, PracticionerService>();
 
 var app = builder.Build();
 

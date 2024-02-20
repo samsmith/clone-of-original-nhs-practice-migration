@@ -28,13 +28,13 @@ public class GPConnectPracticioner : Practitioner
        
         var dto = new PracticionerDTO
         {
-            Reference = this.Id,
+            OriginalId = this.Id,
             SdsUserId = this.Identifier.FirstOrDefault(x => x.System == "https://fhir.nhs.uk/Id/sds-user-id")?.Value,
             SdsRoleProfileId = this.Identifier.FirstOrDefault(x => x.System == "https://fhir.nhs.uk/Id/sds-role-profile-id")?.Value,
             Sex = Gender?.ToString(),
             Title = Name[0].Prefix.FirstOrDefault(),
             GivenName = Name[0].GivenElement.First().Value,
-            MiddleNames = Name[0].GivenElement.Skip(1).Select(x => x.Value),
+            MiddleNames = string.Join(", ",Name[0].GivenElement.Skip(1).Select(x => x.Value)),
             Surname = Name[0].Family,
             Address = new AddressDTO(this.Address.FirstOrDefault()),
         };

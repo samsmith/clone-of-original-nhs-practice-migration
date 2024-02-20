@@ -5,6 +5,7 @@ public class PracticionerRoleDTO : OutboundRelationship
     public PracticionerRoleDTO()
     {
     }
+    public string? OriginalId{ get; set; }
     public IdentifierDTO? Identifier { get; set; }
     
     public bool? Active { get; set; }
@@ -24,4 +25,6 @@ public class PracticionerRoleDTO : OutboundRelationship
     public LocationDTO? Location { get; set; }
 
     public string? Telecom { get; set; }
+    
+    public Guid EntityId{ get; set; }
 }

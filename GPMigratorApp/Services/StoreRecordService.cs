@@ -7,17 +7,22 @@ using GPMigratorApp.Services.Interfaces;
 
 namespace GPMigratorApp.Services;
 
-public class StoreRecordService: IStoreRecordService
+public class StoreRecordService : IStoreRecordService
 {
     private readonly IAzureSqlDbConnectionFactory _connectionFactory;
     private readonly IOrganizationService _organizationService;
-    
-    public StoreRecordService(IAzureSqlDbConnectionFactory connectionFactory, IOrganizationService organizationService)
+    private readonly ILocationService _locationService;
+    private readonly IPracticionerService _practicionerService;
+
+    public StoreRecordService(IAzureSqlDbConnectionFactory connectionFactory, IOrganizationService organizationService,
+        ILocationService locationService, IPracticionerService practicionerService)
     {
         _connectionFactory = connectionFactory;
         _organizationService = organizationService;
+        _locationService = locationService;
+        _practicionerService = practicionerService;
     }
-    
+
     public async Task StoreRecord(FhirResponse fhirResponse, CancellationToken cancellationToken)
     {
         using var connection = await _connectionFactory.GetReadWriteConnectionAsync(cancellationToken);
@@ -25,13 +30,16 @@ public class StoreRecordService: IStoreRecordService
         var transaction = connection.BeginTransaction();
         try
         {
-         
-            var organizationCommand = new OrganizationCommand(connection);
-            foreach (var organization in fhirResponse.Organizations)
-            {
-                await _organizationService.PutOrganizations(fhirResponse.Organizations, connection, transaction,
-                    cancellationToken);
-            }
+            await _organizationService.PutOrganizations(fhirResponse.Organizations, connection, transaction,
+                cancellationToken);
+
+
+            await _locationService.PutLocations(fhirResponse.Locations, connection, transaction,
+                cancellationToken);
+            
+            await _practicionerService.PutPracticioners(fhirResponse.Practitioners, connection, transaction,
+                cancellationToken);
+
 
             transaction.Commit();
         }

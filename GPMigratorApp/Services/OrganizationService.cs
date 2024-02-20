@@ -34,6 +34,7 @@ public class OrganizationService: IOrganizationService
                     organization.Address.Id = existingRecord.Address.Id;
                 }
 
+                existingRecord.OriginalId = organization.OriginalId;
                 existingRecord.ODSCode = organization.ODSCode;
                 existingRecord.PeriodStart = organization.PeriodStart;
                 existingRecord.PeriodEnd = organization.PeriodEnd;

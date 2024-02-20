@@ -59,7 +59,7 @@ public class GPConnectEncounter
             .FirstOrDefault(x => x.Type.Any(y => y.Coding.Any(z => z.Code == "PPRF")))
             ?.Individual
             .Reference;
-        return _practicioners?.FirstOrDefault(x => x.Reference == ReferenceHelper.GetId(reference));
+        return _practicioners?.FirstOrDefault(x => x.OriginalId == ReferenceHelper.GetId(reference));
     }
 
     public String? DataIdentifier
@@ -90,7 +90,7 @@ public class GPConnectEncounter
             ?.Individual
             .Reference;
         
-        return _practicioners?.FirstOrDefault(x => x.Reference == ReferenceHelper.GetId(reference));
+        return _practicioners?.FirstOrDefault(x => x.OriginalId == ReferenceHelper.GetId(reference));
     }
     
 }

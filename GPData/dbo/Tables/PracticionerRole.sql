@@ -1,5 +1,6 @@
 ﻿CREATE TABLE [dbo].[PracticionerRole] (
     [Id]             UNIQUEIDENTIFIER NOT NULL,
+    [OriginalId]     NVARCHAR (255)   NOT NULL,
     [Active]         BIT              NULL,
     [PeriodStart]    DATETIME         NULL,
     [PeriodEnd]      DATETIME         NULL,

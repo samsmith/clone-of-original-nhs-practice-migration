@@ -1,5 +1,6 @@
 ﻿CREATE TABLE [dbo].[Location] (
     [Id]                     UNIQUEIDENTIFIER NOT NULL,
+    [OriginalId]             NVARCHAR (255)   NOT NULL,
     [ODSSiteCodeID]          NVARCHAR (50)    NULL,
     [Status]                 NVARCHAR (50)    NULL,
     [OperationalStatus]      NVARCHAR (50)    NULL,

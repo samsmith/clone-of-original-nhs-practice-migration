@@ -36,7 +36,7 @@ public class GPConnectPracticionerRole : PractitionerRole
             Active = this.Active,
             PeriodStart = DateTime.Parse(this.Period.Start),
             PeriodEnd = DateTime.Parse(this.Period.End),
-            Practicioner = _practicioners.FirstOrDefault(x => x.Id == ReferenceHelper.GetId(this.Practitioner.Reference)),
+            Practicioner = _practicioners.FirstOrDefault(x => x.OriginalId == ReferenceHelper.GetId(this.Practitioner.Reference)),
             Organization = _organisations.FirstOrDefault(x => x.OriginalId == ReferenceHelper.GetId(this.Organization.Reference)),
             SDSJobRoleName = this.Code.FirstOrDefault(x => x.ElementId == "PractitionerRole.code:sdsJobRoleName")?.Text,
             Speciality = this.Specialty.FirstOrDefault()?.Text,

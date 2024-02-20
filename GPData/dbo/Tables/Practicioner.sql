@@ -1,6 +1,6 @@
 ﻿CREATE TABLE [dbo].[Practicioner] (
     [Id]               UNIQUEIDENTIFIER NOT NULL,
-    [Reference]        NVARCHAR (50)    NOT NULL,
+    [OriginalId]       NVARCHAR (255)   NOT NULL,
     [SdsUserId]        NVARCHAR (50)    NULL,
     [SdsRoleProfileId] NVARCHAR (50)    NULL,
     [Title]            NVARCHAR (20)    NULL,

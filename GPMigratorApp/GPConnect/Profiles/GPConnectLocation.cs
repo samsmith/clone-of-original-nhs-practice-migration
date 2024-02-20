@@ -27,14 +27,14 @@ public class GPConnectLocation : Location
         {
             OriginalId = this.Id,
             ODSSiteCode = ODSCode(),
-            Status = this.Status.Value.ToString(),
-            OperationalStatus = this.OperationalStatus.Code,
-            Alias = this.Alias.FirstOrDefault(),
+            Status = this.Status?.ToString(),
+            OperationalStatus = this.OperationalStatus?.Code,
+            Alias = this.Alias?.FirstOrDefault(),
             Description = this.Description,
             Name = this.Name,
-            Telecom = this.Telecom.FirstOrDefault()?.ValueElement.Value,
+            Telecom = this.Telecom?.FirstOrDefault()?.ValueElement.Value,
             Type = this.TypeName,
-            PhysicalType = this.PhysicalType.Text,
+            PhysicalType = this.PhysicalType?.Text,
             
         };
         if (this.Address.Any())
@@ -48,7 +48,7 @@ public class GPConnectLocation : Location
     
     public string? ODSCode()
     {
-        return this.Identifier.FirstOrDefault()?.Value;
+        return this.Identifier?.FirstOrDefault()?.Value;
         
     }
     
@@ -56,7 +56,7 @@ public class GPConnectLocation : Location
     {
         foreach (var propertyInfo in encounter.GetType().GetProperties())
         {
-            var props = typeof(Organization).GetProperties().Where(p => !p.GetIndexParameters().Any());
+            var props = typeof(Location).GetProperties().Where(p => !p.GetIndexParameters().Any());
             foreach (var prop in props)
             {
                 if (prop.CanWrite)

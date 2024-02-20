@@ -39,7 +39,7 @@ public class GPConnectComposition
             Class = _composition.Class.Text,
             //Subject = _patients.FirstOrDefault(x=> x.PatientGuid == ReferenceHelper.GetId(_composition.Subject.Reference)),
             Encounter = _encounters.FirstOrDefault(x=> x.Guid == ReferenceHelper.GetId(_composition.Encounter.Reference)),
-            Author = _practicioners.FirstOrDefault(x=> x.Reference == ReferenceHelper.GetId(_composition.Author.FirstOrDefault()?.Reference ?? string.Empty)),
+            Author = _practicioners.FirstOrDefault(x=> x.OriginalId == ReferenceHelper.GetId(_composition.Author.FirstOrDefault()?.Reference ?? string.Empty)),
             Observation = null,
             Problem = null,
             Title = null,

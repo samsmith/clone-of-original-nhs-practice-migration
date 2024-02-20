@@ -172,6 +172,7 @@ public class OrganizationCommand : IOrganizationCommand
         const string insertOrganization =
                 @"INSERT INTO [dbo].[Organization]
                        ([Id],
+                       [OriginalId],
                        [ODSCode],
                        [PeriodStart],
                        [PeriodEnd],
@@ -185,6 +186,7 @@ public class OrganizationCommand : IOrganizationCommand
                        [EntityId])
                  VALUES
                        (@Id,
+                       @OriginalId,
                        @ODSCode,
                        @PeriodStart,
                        @PeriodEnd,
@@ -200,6 +202,7 @@ public class OrganizationCommand : IOrganizationCommand
             var commandDefinition = new CommandDefinition(insertOrganization, new
             {
                 Id = organization.Id,
+                OriginalId = organization.OriginalId,
                 ODSCode = organization.ODSCode,
                 PeriodStart = organization.PeriodStart,
                 PeriodEnd = organization.PeriodEnd,
@@ -228,6 +231,7 @@ public class OrganizationCommand : IOrganizationCommand
                 @"UPDATE [dbo].[Organization]
 				  SET
                        [ODSCode] = @ODSCode,
+				       [OriginalId] = @OriginalId,
                        [PeriodStart] = @PeriodStart,
                        [PeriodEnd] = @PeriodEnd,
                        [Type] = @Type,
@@ -242,6 +246,7 @@ public class OrganizationCommand : IOrganizationCommand
             var commandDefinition = new CommandDefinition(updateOrganization, new
             {
 	            Id = organization.Id,
+	            OriginalId = organization.OriginalId,
                 ODSCode = organization.ODSCode,
                 PeriodStart = organization.PeriodStart,
                 PeriodEnd = organization.PeriodEnd,

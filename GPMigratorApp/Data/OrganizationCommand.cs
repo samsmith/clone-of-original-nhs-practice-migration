@@ -20,7 +20,7 @@ public class OrganizationCommand : IOrganizationCommand
     }
 
 
-    public async Task<OrganizationDTO?> GetOrganizationAsync(string odsCode, CancellationToken cancellationToken, IDbTransaction transaction)
+    public async Task<OrganizationDTO?> GetOrganizationAsync(string originalId, CancellationToken cancellationToken, IDbTransaction transaction)
     {
 	    string getExisting =
 		    @$"SELECT [{nameof(OrganizationDTO.Id)}]							= org.Id
@@ -66,11 +66,11 @@ public class OrganizationCommand : IOrganizationCommand
 				  LEFT JOIN [dbo].[Organization] partof ON partof.Id = org.PartOfID
 				  LEFT JOIN [dbo].[Contact] contact ON contact.Id = org.ContactID
 				  LEFT JOIN [dbo].[Address] contactaddress ON contactaddress.Id = contact.AddressID
-				  WHERE org.ODSCode = @ODSCode";
+				  WHERE org.OriginalId = @OriginalId";
         
             var reader = await _connection.QueryMultipleAsync(getExisting, new
             {
-                ODSCode = odsCode
+	            OriginalId = originalId
             }, transaction: transaction);
             var organizations = reader.Read<OrganizationDTO, LocationDTO, AddressDTO,OrganizationDTO, ContactDTO,AddressDTO,OrganizationDTO>(
                 (organization, location, address, partof, contact, contactaddress) =>

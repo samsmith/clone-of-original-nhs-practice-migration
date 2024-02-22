@@ -20,9 +20,9 @@ public class OrganizationService: IOrganizationService
     public async Task PutOrganizations(IEnumerable<OrganizationDTO> organizations,IDbConnection connection, IDbTransaction transaction, CancellationToken cancellationToken)
     { 
         var organizationCommand = new OrganizationCommand(connection);
-        foreach (var organization in organizations.Where(x=> !x.ODSCode.IsNullOrEmpty()))
+        foreach (var organization in organizations)
         {
-            var existingRecord = await organizationCommand.GetOrganizationAsync(organization.ODSCode, cancellationToken, transaction);
+            var existingRecord = await organizationCommand.GetOrganizationAsync(organization.OriginalId, cancellationToken, transaction);
             if (existingRecord is null)
             {
                 await organizationCommand.InsertOrganizationAsync(organization, cancellationToken,transaction);

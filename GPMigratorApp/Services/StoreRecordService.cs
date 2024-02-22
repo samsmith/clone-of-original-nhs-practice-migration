@@ -37,7 +37,7 @@ public class StoreRecordService : IStoreRecordService
             await _locationService.PutLocations(fhirResponse.Locations, connection, transaction,
                 cancellationToken);
             
-            await _practicionerService.PutPracticioners(fhirResponse.Practitioners, connection, transaction,
+            await _practicionerService.PutPracticioners(fhirResponse.Practitioners, fhirResponse.PractitionerRoles, connection, transaction,
                 cancellationToken);
 
 

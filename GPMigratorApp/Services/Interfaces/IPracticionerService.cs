@@ -5,6 +5,6 @@ namespace GPMigratorApp.Services.Interfaces;
 
 public interface IPracticionerService
 {
-    Task PutPracticioners(IEnumerable<PracticionerDTO> practicioners, IDbConnection connection, IDbTransaction transaction, CancellationToken cancellationToken);
+    Task PutPracticioners(IEnumerable<PracticionerDTO> practicioners, IEnumerable<PracticionerRoleDTO> practicionerRoles, IDbConnection connection, IDbTransaction transaction, CancellationToken cancellationToken);
 
 }

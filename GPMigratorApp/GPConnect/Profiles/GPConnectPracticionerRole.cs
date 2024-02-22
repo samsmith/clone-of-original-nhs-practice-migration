@@ -32,13 +32,12 @@ public class GPConnectPracticionerRole : PractitionerRole
 
         var dto = new PracticionerRoleDTO
         {
+            OriginalId = this.Id,
             Identifier = new IdentifierDTO((this.Identifier.FirstOrDefault())),
             Active = this.Active,
-            PeriodStart = DateTime.Parse(this.Period.Start),
-            PeriodEnd = DateTime.Parse(this.Period.End),
             Practicioner = _practicioners.FirstOrDefault(x => x.OriginalId == ReferenceHelper.GetId(this.Practitioner.Reference)),
             Organization = _organisations.FirstOrDefault(x => x.OriginalId == ReferenceHelper.GetId(this.Organization.Reference)),
-            SDSJobRoleName = this.Code.FirstOrDefault(x => x.ElementId == "PractitionerRole.code:sdsJobRoleName")?.Text,
+            SDSJobRoleName = this.Code?.FirstOrDefault()?.Coding?.FirstOrDefault(x=> x.System == "https://fhir.nhs.uk/STU3/CodeSystem/CareConnect-SDSJobRoleName-1")?.Code,
             Speciality = this.Specialty.FirstOrDefault()?.Text,
             Location = _locations.FirstOrDefault(x =>
             {
@@ -48,6 +47,10 @@ public class GPConnectPracticionerRole : PractitionerRole
             }),
             Telecom = this.Telecom.FirstOrDefault()?.Value
         };
+        if (this.Period?.Start is not null)
+            dto.PeriodStart = DateTime.Parse(this.Period.Start);
+        if (this.Period?.End is not null)
+            dto.PeriodEnd = DateTime.Parse(this.Period.End);
         return dto;
     }
     
@@ -55,7 +58,7 @@ public class GPConnectPracticionerRole : PractitionerRole
     {
         foreach (var propertyInfo in encounter.GetType().GetProperties())
         {
-            var props = typeof(Practitioner).GetProperties().Where(p => !p.GetIndexParameters().Any());
+            var props = typeof(PractitionerRole).GetProperties().Where(p => !p.GetIndexParameters().Any());
             foreach (var prop in props)
             {
                 if (prop.CanWrite)

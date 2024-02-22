@@ -134,7 +134,7 @@ public class PracticionerCommand : IPracticionerCommand
 	        await _connection.ExecuteAsync(practicionerAddressDefinition);
         }
 
-        const string insertOrganization =
+        const string insertPracticioner =
                 @"INSERT INTO [dbo].[Practicioner]
                        	  ([Id],
 						  [OriginalId],
@@ -160,7 +160,7 @@ public class PracticionerCommand : IPracticionerCommand
                        @DateOfBirthUtc,
                        @AddressID)";
             
-            var commandDefinition = new CommandDefinition(insertOrganization, new
+            var commandDefinition = new CommandDefinition(insertPracticioner, new
             {
                 Id = practicioner.Id,
                 OriginalId = practicioner.OriginalId,

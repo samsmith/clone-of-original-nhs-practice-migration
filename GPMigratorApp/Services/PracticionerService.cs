@@ -1,5 +1,6 @@
 using System.Data;
 using GPMigratorApp.Data;
+using GPMigratorApp.Data.Interfaces;
 using GPMigratorApp.DTOs;
 using GPMigratorApp.Services.Interfaces;
 
@@ -7,14 +8,13 @@ namespace GPMigratorApp.Services;
 
 public class PracticionerService: IPracticionerService
 {
-    
     public PracticionerService()
     {
         
     }
     
     public async Task PutPracticioners(IEnumerable<PracticionerDTO> practicioners, IEnumerable<PracticionerRoleDTO> practicionerRoles, IDbConnection connection, IDbTransaction transaction, CancellationToken cancellationToken)
-    { 
+    {
         var practicionerCommand = new PracticionerCommand(connection);
         foreach (var practicioner in practicioners)
         {

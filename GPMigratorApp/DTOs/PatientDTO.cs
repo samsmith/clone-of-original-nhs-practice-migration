@@ -9,6 +9,7 @@ public class PatientDTO
     }
 
     public Guid Id { get; set; }
+    public string OriginalId { get; set; }
     public string PatientId { get; set; }
     public string OrganisationGuid { get; set; }
     public string UsualGpUserInRoleGuid { get; set; }
@@ -17,7 +18,7 @@ public class PatientDTO
     public DateTime? DateOfDeathUTC { get; set; }
     public string? Title { get; set; }
     public string GivenName { get; set; }
-    public IEnumerable<string>? MiddleNames { get; set; }
+    public string? MiddleNames { get; set; }
     public string Surname { get; set; }
     public DateTime? DateOfRegistrationUTC { get; set; }
     public string? NhsNumber { get; set; }
@@ -36,7 +37,7 @@ public class PatientDTO
     public bool? Active{ get; set; }
     public bool? SpineSensitive { get; set; }
     public bool? IsConfidential { get; set; }
-    public MailAddress? EmailAddress { get; set; }
+    public string? EmailAddress { get; set; }
     public string? HomePhone { get; set; }
     public string? MobilePhone { get; set; }
     public PracticionerDTO? UsualGP { get; set; }
@@ -44,7 +45,7 @@ public class PatientDTO
     public string? ProcessingId { get; set; }
     public string? Ethnicity { get; set; }
     public string? Religion { get; set; }
-    
+    public Guid EntityId { get; set; }
     public List<CommunicationDTO>? Communication{ get; set; }
 
 }

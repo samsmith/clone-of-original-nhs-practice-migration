@@ -47,6 +47,7 @@ builder.Services.AddScoped<IGPConnectService, GPConnectService>();
 builder.Services.AddScoped<IOrganizationService, OrganizationService>();
 builder.Services.AddScoped<ILocationService, LocationService>();
 builder.Services.AddScoped<IPracticionerService, PracticionerService>();
+builder.Services.AddScoped<IPatientService, PatientService>();
 
 var app = builder.Build();
 

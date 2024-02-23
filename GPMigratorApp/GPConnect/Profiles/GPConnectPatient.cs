@@ -12,8 +12,12 @@ namespace GPMigratorApp.GPConnect.Profiles;
 [FhirType("Patient","http://hl7.org/fhir/StructureDefinition/Patient", IsResource=true)]
 public class GPConnectPatient : Patient
 {
-    public GPConnectPatient(Patient patient)
+    private IEnumerable<OrganizationDTO> _organizations;
+    private IEnumerable<PracticionerDTO> _practicioners;
+    public GPConnectPatient(Patient patient, IEnumerable<OrganizationDTO> organizations, IEnumerable<PracticionerDTO> practicioners)
     {
+        _organizations = organizations;
+        _practicioners = practicioners;
         InitInhertedProperties(patient);
         var dto = GetDTO();
     }
@@ -21,13 +25,13 @@ public class GPConnectPatient : Patient
     public PatientDTO GetDTO()
     {
         var dto = new PatientDTO();
-        dto.PatientId = this.Id;
-        dto.OrganisationGuid = ReferenceHelper.GetId(this.ManagingOrganization.Reference);
-        dto.UsualGpUserInRoleGuid = ReferenceHelper.GetId(GeneralPractitioner.FirstOrDefault().Reference);
+        dto.OriginalId = this.Id;
+        dto.ManagingOrganization = _organizations.FirstOrDefault(x => x.OriginalId == ReferenceHelper.GetId(this.ManagingOrganization.Reference));
+        dto.UsualGP = _practicioners.FirstOrDefault(x=> x.OriginalId == ReferenceHelper.GetId(GeneralPractitioner.FirstOrDefault().Reference));
         dto.Gender = Gender?.ToString();
         dto.Title = Name[0].Prefix.FirstOrDefault();
         dto.GivenName = Name[0].GivenElement.First().Value;
-        dto.MiddleNames = Name[0].GivenElement.Skip(1).Select(x=> x.Value);
+        dto.MiddleNames = string.Join(" ",Name[0].GivenElement.Skip(1).Select(x => x.Value));
         dto.Surname = Name[0].Family;
         dto.DateOfBirthUTC = DateTime.Parse(this.BirthDate);
         var deceasedDate = (FhirDateTime?) this.Deceased;

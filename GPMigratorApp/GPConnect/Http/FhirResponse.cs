@@ -16,8 +16,7 @@ namespace GPConnect.Provider.AcceptanceTests.Http
         public Resource Resource { get; set; }
 
         public List<Bundle.EntryComponent> Entries => ((Bundle)Resource).Entry;
-
-        public IEnumerable<PatientDTO> Patients => GetResources<Patient>(ResourceType.Patient).Select(x=> new GPConnectPatient(x).GetDTO());
+        
         public List<Composition> Compositions => GetResources<Composition>(ResourceType.Composition);
         public List<Device> Devices => GetResources<Device>(ResourceType.Device);
         
@@ -39,7 +38,7 @@ namespace GPConnect.Provider.AcceptanceTests.Http
         public List<List> Lists => GetResources<List>(ResourceType.List);
         public IEnumerable<PracticionerDTO> Practitioners => GetResources<Practitioner>(ResourceType.Practitioner).Select(x=> new GPConnectPracticioner(x,Organizations).GetDTO());
         public IEnumerable<PracticionerRoleDTO> PractitionerRoles => GetResources<PractitionerRole>(ResourceType.PractitionerRole).Select(x=> new GPConnectPracticionerRole(x,Organizations,Practitioners,Locations).GetDTO());
-
+        public IEnumerable<PatientDTO> Patients => GetResources<Patient>(ResourceType.Patient).Select(x=> new GPConnectPatient(x, Organizations, Practitioners).GetDTO());
         private List<T> GetResources<T>(ResourceType resourceType) where T : Resource
         {
             //Need to consider cases where T isn't in ResourceTypeMap (and implementation!!)

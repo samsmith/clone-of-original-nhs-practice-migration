@@ -46,7 +46,7 @@ public class StoreRecordService : IStoreRecordService
             await _practicionerService.PutPracticioners(fhirResponse.Practitioners, fhirResponse.PractitionerRoles, connection, transaction,
                 cancellationToken);
 
-            await _patientService.PutPatients(fhirResponse.Patients, connection, transaction,
+            await _patientService.PutPatientsAsync(fhirResponse.Patients, connection, transaction,
                 cancellationToken);
 
 

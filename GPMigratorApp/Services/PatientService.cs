@@ -1,5 +1,6 @@
 using System.Data;
 using GPMigratorApp.Data;
+using GPMigratorApp.Data.Database.Providers.Interfaces;
 using GPMigratorApp.DTOs;
 using GPMigratorApp.Services.Interfaces;
 
@@ -7,7 +8,25 @@ namespace GPMigratorApp.Services;
 
 public class PatientService : IPatientService
 {
-    public async Task PutPatients(IEnumerable<PatientDTO> patients, IDbConnection connection,
+    private readonly IAzureSqlDbConnectionFactory _connectionFactory;
+
+    public PatientService(IAzureSqlDbConnectionFactory connectionFactory)
+    {
+        _connectionFactory = connectionFactory;
+    }
+
+    public async Task<PatientDTO> GetPatientAsync(string nhsNumber, CancellationToken cancellationToken)
+    {
+        var newConnection =  await _connectionFactory.GetReadOnlyConnectionAsync(cancellationToken);
+        
+        var patientCommand = new PatientCommand(newConnection);
+
+        var existingRecord = await patientCommand.GetPatientByNHSNumberAsync(nhsNumber, cancellationToken);
+
+        return existingRecord;
+
+    }
+    public async Task PutPatientsAsync(IEnumerable<PatientDTO> patients, IDbConnection connection,
         IDbTransaction transaction, CancellationToken cancellationToken)
     {
         var patientCommand = new PatientCommand(connection);

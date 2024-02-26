@@ -1,4 +1,5 @@
 ﻿@using Newtonsoft.Json
+@using GPMigratorApp.ViewComponents
 @model Search
 @{
     ViewData["Title"] = "Home Page";
@@ -110,10 +111,9 @@
                     <div class="nhsuk-tabs__panel" id="patient">
                         <div>
                             <h2 class="">Patient</h2>
-                            @foreach (var patient in @Model.Response.Patients)
-                            {
-                                @Html.Partial("Patient", patient)
-                            }
+                          
+                                @await Component.InvokeAsync(nameof(Patient),new {nhsNumber = @Model.NhsNumber})
+                            
                         </div>
                     </div>
                     <div class="nhsuk-tabs__panel" id="medication-statements">

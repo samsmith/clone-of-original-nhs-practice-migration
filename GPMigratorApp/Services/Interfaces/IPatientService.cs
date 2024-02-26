@@ -5,6 +5,8 @@ namespace GPMigratorApp.Services.Interfaces;
 
 public interface IPatientService
 {
-    Task PutPatients(IEnumerable<PatientDTO> patients, IDbConnection connection, IDbTransaction transaction,
+    Task PutPatientsAsync(IEnumerable<PatientDTO> patients, IDbConnection connection, IDbTransaction transaction,
         CancellationToken cancellationToken);
+
+    Task<PatientDTO> GetPatientAsync(string nhsNumber, CancellationToken cancellationToken);
 }

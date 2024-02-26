@@ -65,7 +65,7 @@
             <dt class="nhsuk-summary-list__key">
                 Home Address
             </dt>
-            @Html.Partial("Address", @Model.HomeAddress)
+            @await Html.PartialAsync("Address", @Model.HomeAddress)
         }
     </div>
     @if (@Model.OtherAddresses != null && Model.OtherAddresses.Any())
@@ -77,7 +77,7 @@
         </dt>
         @foreach (var address in @Model.OtherAddresses)
         {
-            @Html.Partial("Address", @Model.HomeAddress)
+            @await Html.PartialAsync("Address", @Model.HomeAddress)
         }
     </div>
     }

@@ -113,6 +113,117 @@ public class PatientCommand : IPatientCommand
             return patients.FirstOrDefault();
     }
     
+         
+     public async Task<PatientDTO?> GetPatientByNHSNumberAsync(string nhsNumber, CancellationToken cancellationToken)
+    {
+	    string getExisting =
+		    @$"SELECT 
+					   [{nameof(PatientDTO.Id)}]								= patient.Id
+                      ,[{nameof(PatientDTO.OriginalId)}]                  		= patient.OriginalId
+                      ,[{nameof(PatientDTO.Gender)}]                    		= patient.Sex
+                      ,[{nameof(PatientDTO.Title)}]                        		= patient.Title
+                      ,[{nameof(PatientDTO.GivenName)}]                   		= patient.GivenName
+					  ,[{nameof(PatientDTO.MiddleNames)}]                  		= patient.MiddleNames
+                      ,[{nameof(PatientDTO.Surname)}]							= patient.Surname
+  					  ,[{nameof(PatientDTO.DateOfBirthUTC)}]               		= patient.DateOfBirthUtc					  
+                      ,[{nameof(PatientDTO.DateOfDeathUTC)}]                	= patient.DateOfDeathUTC
+                      ,[{nameof(PatientDTO.DateOfRegistrationUTC)}]         	= patient.DateOfRegistrationUTC
+                      ,[{nameof(PatientDTO.NhsNumber)}]             			= patient.NhsNumber
+                      ,[{nameof(PatientDTO.PatientTypeDescription)}]        	= patient.PatientTypeDescription
+                      ,[{nameof(PatientDTO.DummyType)}]                    		= patient.DummyType
+					  ,[{nameof(PatientDTO.ResidentialInstituteCode)}]      	= patient.ResidentialInstituteCode
+                      ,[{nameof(PatientDTO.NHSNumberStatus)}]					= patient.NHSNumberStatus
+                      ,[{nameof(PatientDTO.CarerName)}]							= patient.CarerName
+  					  ,[{nameof(PatientDTO.DateOfBirthUTC)}]                	= patient.DateOfBirthUtc					  
+                      ,[{nameof(PatientDTO.OriginalId)}]                  		= patient.OriginalId
+                      ,[{nameof(PatientDTO.CarerRelation)}]                 	= patient.CarerRelation
+                      ,[{nameof(PatientDTO.PersonGuid)}]             			= patient.PersonGuid
+                      ,[{nameof(PatientDTO.DateOfDeactivation)}]                = patient.DateOfDeactivation
+                      ,[{nameof(PatientDTO.Deleted)}]                    		= patient.Deleted
+					  ,[{nameof(PatientDTO.Active)}]                  			= patient.Active
+                      ,[{nameof(PatientDTO.SpineSensitive)}]					= patient.SpineSensitive
+                      ,[{nameof(PatientDTO.IsConfidential)}]					= patient.IsConfidential
+  					  ,[{nameof(PatientDTO.EmailAddress)}]               		= patient.EmailAddress
+                      ,[{nameof(PatientDTO.HomePhone)}]							= patient.HomePhone
+					  ,[{nameof(PatientDTO.MobilePhone)}]						= patient.MobilePhone
+					  ,[{nameof(PatientDTO.ProcessingId)}]						= patient.ProcessingId
+					  ,[{nameof(PatientDTO.Ethnicity)}]							= patient.Ethnicity
+					  ,[{nameof(PatientDTO.Religion)}]							= patient.Religion
+					  ,[{nameof(AddressDTO.Id)}]								= address.Id
+					  ,[{nameof(AddressDTO.Use)}]								= address.[Use]
+					  ,[{nameof(AddressDTO.HouseNameFlatNumber)}]				= address.HouseNameFlatNumber
+					  ,[{nameof(AddressDTO.NumberAndStreet)}]					= address.NumberAndStreet
+					  ,[{nameof(AddressDTO.Village)}]							= address.Village
+					  ,[{nameof(AddressDTO.Town )}]								= address.Town
+					  ,[{nameof(AddressDTO.County )}]							= address.County
+					  ,[{nameof(AddressDTO.Postcode)}]							= address.Postcode
+					  ,[{nameof(AddressDTO.From)}]								= address.[From]
+					  ,[{nameof(AddressDTO.To )}]								= address.[To]
+					  ,[{nameof(OrganizationDTO.Id)}]							= org.Id
+                      ,[{nameof(OrganizationDTO.ODSCode)}]                      = org.ODSCode
+                      ,[{nameof(OrganizationDTO.PeriodStart)}]                  = org.PeriodStart
+                      ,[{nameof(OrganizationDTO.PeriodEnd)}]                    = org.PeriodEnd
+                      ,[{nameof(OrganizationDTO.Type)}]                         = org.Type
+                      ,[{nameof(OrganizationDTO.Name)}]                         = org.Name
+                      ,[{nameof(OrganizationDTO.Telecom)}]                      = org.Telecom
+					  ,[{nameof(OrganizationDTO.EntityId)}]                     = org.EntityId
+					  ,[{nameof(PracticionerDTO.Id)}]							= prac.Id
+                      ,[{nameof(PracticionerDTO.OriginalId)}]                  	= prac.OriginalId
+                      ,[{nameof(PracticionerDTO.SdsUserId)}]                    = prac.SdsUserId
+                      ,[{nameof(PracticionerDTO.SdsRoleProfileId)}]             = prac.SdsRoleProfileId
+                      ,[{nameof(PracticionerDTO.Title)}]                        = prac.Title
+                      ,[{nameof(PracticionerDTO.GivenName)}]                    = prac.GivenName
+					  ,[{nameof(PracticionerDTO.MiddleNames)}]                  = prac.MiddleNames
+                      ,[{nameof(PracticionerDTO.Surname)}]						= prac.Surname
+                      ,[{nameof(PracticionerDTO.Sex)}]							= prac.Gender
+  					  ,[{nameof(PracticionerDTO.DateOfBirthUtc)}]               = prac.DateOfBirthUtc                                     
+					                                       
+
+                  FROM [dbo].[Patient] patient
+				  LEFT JOIN [dbo].[Address] address ON address.Id = patient.HomeAddress
+				  LEFT JOIN [dbo].[Organization] org ON org.Id = patient.ManagingOrganization
+				  LEFT JOIN [dbo].[Practicioner] prac ON prac.Id = patient.Practicioner
+				  WHERE patient.NHSNumber = @NhsNumber";
+        
+            var reader = await _connection.QueryMultipleAsync(getExisting, new
+            {
+	            NhsNumber = nhsNumber
+            }
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            );
+            var patients = reader.Read<PatientDTO, AddressDTO?, OrganizationDTO?, PracticionerDTO?, PatientDTO>(
+                (patient, address, organization, practicioner) =>
+                {
+	                if (address is not null)
+	                {
+		                patient.HomeAddress = address;
+	                }
+	                if (organization is not null)
+	                {
+		                patient.ManagingOrganization = organization;
+	                }
+	                if (practicioner is not null)
+	                {
+		                patient.UsualGP = practicioner;
+	                }
+
+	                return patient;
+                }, splitOn: $"{nameof(AddressDTO.Id)},{nameof(OrganizationDTO.Id)},{nameof(PracticionerDTO.Id)}");
+
+            return patients.FirstOrDefault();
+    }
+    
     public async Task<Guid> InsertPatientAsync(PatientDTO patient, CancellationToken cancellationToken, IDbTransaction transaction)
     {
 	    patient.Id = Guid.NewGuid();

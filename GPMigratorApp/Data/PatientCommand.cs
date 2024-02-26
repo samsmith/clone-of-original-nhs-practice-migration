@@ -13,7 +13,7 @@ public class PatientCommand : IPatientCommand
     
     public PatientCommand(IDbConnection connection)
     {
-        _connection = connection;
+	    _connection = connection;
     }
     
      public async Task<PatientDTO?> GetPatientAsync(string originalId, CancellationToken cancellationToken, IDbTransaction transaction)
@@ -211,7 +211,8 @@ public class PatientCommand : IPatientCommand
                    ,[ProcessingId]
                    ,[Ethnicity]
                    ,[Religion]
-                   ,[HomeAddress])
+                   ,[HomeAddress]
+                   ,[EntityId])
              VALUES
                    (
                     @PatientId,

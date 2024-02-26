@@ -15,32 +15,38 @@ namespace GPMigratorApp.GPConnect.Profiles;
 [FhirType("Organization","http://hl7.org/fhir/StructureDefinition/Organization", IsResource=true)]
 public class GPConnectObservation : Observation
 {
-    public GPConnectObservation(Observation observation, IEnumerable<PatientDTO> patients, IEnumerable<PracticionerDTO> practicioners, )
+    private readonly IEnumerable<PatientDTO> _patients;
+    private readonly IEnumerable<PracticionerDTO> _practicioners;
+    public GPConnectObservation(Observation observation, IEnumerable<PatientDTO> patients, IEnumerable<PracticionerDTO> practicioners )
     {
         InitInhertedProperties(observation);
+        _patients = patients;
+        _practicioners = practicioners;
     }
 
-    public OrganizationDTO GetDTO()
+    public ObservationDTO GetDTO()
     {
         var dto = new ObservationDTO()
         {
             OriginalId = this.Id,
-    
-    Identifier  = this.Identifier.FirstOrDefault(),
-        
-    BasedOn = new OutboundRelationship{OriginalId = this.BasedOn?.FirstOrDefault()?.Reference, Type = this.BasedOn?.FirstOrDefault()?.Type},
-    Status = this.Status.Value.ToString(),
-    Category = this.Category.FirstOrDefault()?.Coding?.FirstOrDefault()?.Code,
-    Code = this.Code.Coding?.FirstOrDefault()?.Code,
-    Subject = this.Subject.Reference
-    Context
-    EffectiveDate
-    EffectivePeriod
-    Performer
+
+            Identifier = new IdentifierDTO(this.Identifier.FirstOrDefault()),
+
+            BasedOn = new OutboundRelationship
+                { OriginalId = this.BasedOn?.FirstOrDefault()?.Reference, Type = this.BasedOn?.FirstOrDefault()?.Type },
+            Status = this.Status.Value.ToString(),
+            Category = this.Category.FirstOrDefault()?.Coding?.FirstOrDefault()?.Code,
+            Code = this.Code.Coding?.FirstOrDefault()?.Code,
+            Subject = _patients.FirstOrDefault(x => x.OriginalId == this.Subject.Reference),
+            Context = null,
+            EffectiveDate = (DateTime)this.Effective.FirstOrDefault(x => x.Key == "").Value,
+            EffectivePeriod = null,
+            Performer = new OutboundRelationship
+            {
+                OriginalId = this.Performer?.FirstOrDefault()?.Reference, Type = this.Performer?.FirstOrDefault()?.Type
+            },
+        };
         return dto;
-        }
-       
-        code.Coding
     }
     
     

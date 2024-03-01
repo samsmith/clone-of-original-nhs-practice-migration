@@ -20,10 +20,15 @@ public class GPConnectService : IGPConnectService
         _jwtHelper = jwtHelper;
     }
 
-    public async Task<FhirResponse> GetLocalFile()
+    public async Task<FhirResponse> GetLocalFile(string nhsNumber)
     {
         var path = Directory.GetCurrentDirectory();
-        string text = await File.ReadAllTextAsync(path + $"{Path.DirectorySeparatorChar}example_json{Path.DirectorySeparatorChar}Shoshana_Daniels.json");
+        var text = "";
+        
+        if(nhsNumber == "9465698490")
+             text = await File.ReadAllTextAsync(path + $"{Path.DirectorySeparatorChar}example_json{Path.DirectorySeparatorChar}Shoshana_Daniels.json");
+        else if(nhsNumber == "9730333831")
+            text = await File.ReadAllTextAsync(path + $"{Path.DirectorySeparatorChar}example_json{Path.DirectorySeparatorChar}EMIS_9730333831_full.json");
         var jsonParser = new FhirJsonParser();
         var fhirResponse = new FhirResponse();
         

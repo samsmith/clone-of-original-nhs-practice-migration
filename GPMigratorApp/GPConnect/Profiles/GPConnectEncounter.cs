@@ -29,7 +29,7 @@ public class GPConnectEncounter
     {
         var dto = new EncounterDTO
         {
-            Guid = _encounter.Id,
+            OriginalId = _encounter.Id,
             //Identifier = DataIdentifier,
             Status = _encounter.Status.ToString(),
             Type = TypeText,

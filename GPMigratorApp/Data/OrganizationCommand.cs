@@ -110,15 +110,18 @@ public class OrganizationCommand : IOrganizationCommand
                     
         var entity = @"INSERT INTO [dbo].[Entity]
                         ([Id],
+                         [OriginalId],
                         [EntityType])
                     VALUES
                         (@Id,
+                        @OriginalId,
                         @Type)";
                     
         var entityDefinition = new CommandDefinition(entity, new
         {
             Id = organization.EntityId,
             Type = EntityTypes.Organization,
+            OriginalId = organization.OriginalId
         }, cancellationToken: cancellationToken, transaction: transaction);
                     
         await _connection.ExecuteAsync(entityDefinition);

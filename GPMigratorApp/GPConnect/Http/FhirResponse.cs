@@ -24,7 +24,6 @@ namespace GPConnect.Provider.AcceptanceTests.Http
         public List<Slot> Slots => GetResources<Slot>(ResourceType.Slot);
         public List<Appointment> Appointments => GetResources<Appointment>(ResourceType.Appointment);
         public List<Schedule> Schedules => GetResources<Schedule>(ResourceType.Schedule);
-        public List<Observation> Observations => GetResources<Observation>(ResourceType.Observation);
         public List<CapabilityStatement> CapabilityStatements => GetResources<CapabilityStatement>(ResourceType.CapabilityStatement);
         public IEnumerable<GpConnectAllergyIntolerance> AllergyIntolerances => GetResources<AllergyIntolerance>(ResourceType.AllergyIntolerance).Select(x => new GpConnectAllergyIntolerance(x, this));
         public IEnumerable<GPConnectMedication> Medications => GetResources<Medication>(ResourceType.Medication).Select(x => new GPConnectMedication(x, this));
@@ -39,6 +38,7 @@ namespace GPConnect.Provider.AcceptanceTests.Http
         public IEnumerable<PracticionerDTO> Practitioners => GetResources<Practitioner>(ResourceType.Practitioner).Select(x=> new GPConnectPracticioner(x,Organizations).GetDTO());
         public IEnumerable<PracticionerRoleDTO> PractitionerRoles => GetResources<PractitionerRole>(ResourceType.PractitionerRole).Select(x=> new GPConnectPracticionerRole(x,Organizations,Practitioners,Locations).GetDTO());
         public IEnumerable<PatientDTO> Patients => GetResources<Patient>(ResourceType.Patient).Select(x=> new GPConnectPatient(x, Organizations, Practitioners).GetDTO());
+        public IEnumerable<ObservationDTO> Observations => GetResources<Observation>(ResourceType.Observation).Select(x=> new GPConnectObservation(x, Patients).GetDTO());
         private List<T> GetResources<T>(ResourceType resourceType) where T : Resource
         {
             //Need to consider cases where T isn't in ResourceTypeMap (and implementation!!)

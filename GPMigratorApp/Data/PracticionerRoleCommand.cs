@@ -41,7 +41,7 @@ public class PracticionerRoleCommand : IPracticionerRoleCommand
                       ,[{nameof(PracticionerDTO.GivenName)}]                    = prac.GivenName
 					  ,[{nameof(PracticionerDTO.MiddleNames)}]                  = prac.MiddleNames
                       ,[{nameof(PracticionerDTO.Surname)}]						= prac.Surname
-                      ,[{nameof(PracticionerDTO.Sex)}]							= prac.Gender
+                      ,[{nameof(PracticionerDTO.Gender)}]						= prac.Gender
   					  ,[{nameof(PracticionerDTO.DateOfBirthUtc)}]               = prac.DateOfBirthUtc
 					  ,[{nameof(OrganizationDTO.Id)}]							= org.Id
                       ,[{nameof(OrganizationDTO.ODSCode)}]                      = org.ODSCode

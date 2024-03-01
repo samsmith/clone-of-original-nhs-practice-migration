@@ -4,7 +4,7 @@
     [SdsUserId]        NVARCHAR (50)    NULL,
     [SdsRoleProfileId] NVARCHAR (50)    NULL,
     [Title]            NVARCHAR (20)    NULL,
-    [GivenName]        NVARCHAR (100)   NOT NULL,
+    [GivenName]        NVARCHAR (100)   NULL,
     [MiddleNames]      NVARCHAR (250)   NULL,
     [Surname]          NVARCHAR (100)   NOT NULL,
     [Gender]           NVARCHAR (10)    NULL,

@@ -27785,6 +27785,7 @@
                 "id": "84E7D56A-1A59-4114-99C0-ED0E6F029775-PROB",
                 "meta": {
                     "profile": [
+                      
                         "https://fhir.nhs.uk/STU3/StructureDefinition/CareConnect-GPC-ProblemHeader-Condition-1"
                     ]
                 },

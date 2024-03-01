@@ -4,7 +4,7 @@
     [ManagingOrganization]     UNIQUEIDENTIFIER NOT NULL,
     [Practicioner]             UNIQUEIDENTIFIER NOT NULL,
     [HomeAddress]              UNIQUEIDENTIFIER NULL,
-    [Sex]                      NVARCHAR (255)   NULL,
+    [Gender]                   NVARCHAR (255)   NULL,
     [DateOfBirthUTC]           DATETIME         NOT NULL,
     [DateOfDeathUTC]           DATETIME         NULL,
     [Title]                    NVARCHAR (255)   NULL,

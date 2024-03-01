@@ -1,7 +1,9 @@
 namespace GPMigratorApp.DTOs;
 
 public class DeviceDTO
-{
+{   
+    public Guid Id { get; set; }
+    public string OriginalId { get; set; }
     public IdentifierDTO Identifier { get; set; }
     public TypeDTO Type { get; set; }
     public string manufacturer { get; set; }

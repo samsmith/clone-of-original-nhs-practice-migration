@@ -33,7 +33,7 @@ public class PracticionerCommand : IPracticionerCommand
                       ,[{nameof(PracticionerDTO.GivenName)}]                    = prac.GivenName
 					  ,[{nameof(PracticionerDTO.MiddleNames)}]                  = prac.MiddleNames
                       ,[{nameof(PracticionerDTO.Surname)}]						= prac.Surname
-                      ,[{nameof(PracticionerDTO.Sex)}]							= prac.Gender
+                      ,[{nameof(PracticionerDTO.Gender)}]						= prac.Gender
   					  ,[{nameof(PracticionerDTO.DateOfBirthUtc)}]               = prac.DateOfBirthUtc
                       ,[{nameof(AddressDTO.Id)}]								= address.Id
 					  ,[{nameof(AddressDTO.Use)}]								= address.[Use]
@@ -75,15 +75,18 @@ public class PracticionerCommand : IPracticionerCommand
                     
         var entity = @"INSERT INTO [dbo].[Entity]
                         ([Id],
+                         [OriginalId],
                         [EntityType])
                     VALUES
                         (@Id,
+                        @OriginalId,
                         @Type)";
                     
         var entityDefinition = new CommandDefinition(entity, new
         {
             Id = practicioner.EntityId,
             Type = EntityTypes.Practitioner,
+            OriginalId = practicioner.OriginalId
         }, cancellationToken: cancellationToken, transaction: transaction);
                     
         await _connection.ExecuteAsync(entityDefinition);
@@ -170,7 +173,7 @@ public class PracticionerCommand : IPracticionerCommand
                 GivenName = practicioner.GivenName,
                 MiddleNames = practicioner.MiddleNames,
                 Surname = practicioner.Surname,
-                Gender = practicioner.Sex,
+                Gender = practicioner.Gender,
                 DateOfBirthUtc = practicioner.DateOfBirthUtc,
                 AddressID = practicioner.Address?.Id
                 
@@ -213,7 +216,7 @@ public class PracticionerCommand : IPracticionerCommand
 	            GivenName = practicioner.GivenName,
 	            MiddleNames = practicioner.MiddleNames,
 	            Surname = practicioner.Surname,
-	            Gender = practicioner.Sex,
+	            Gender = practicioner.Gender,
 	            Address = practicioner.Address?.Id,
 	            DateOfBirthUtc = practicioner.DateOfBirthUtc,
 	            AddressID = practicioner.Address?.Id

@@ -33,7 +33,7 @@ namespace GPMigratorApp.Controllers
         public IActionResult Index()
         {
             var search = new Search();
-            search.NhsNumber = "9465698490";
+            search.NhsNumber = "9730333831";
             return View(search);
         }
         
@@ -58,9 +58,12 @@ namespace GPMigratorApp.Controllers
 
             if (search.NhsNumber == "9465698490")
             {
-                search.Response = await _gpConnectService.GetLocalFile();
+                search.Response = await _gpConnectService.GetLocalFile("9465698490");
             }
-
+            if (search.NhsNumber == "9730333831")
+            {
+                search.Response = await _gpConnectService.GetLocalFile("9730333831");
+            }
 
             var request = CreateRequest(search.NhsNumber.Trim());
 

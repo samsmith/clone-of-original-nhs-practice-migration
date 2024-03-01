@@ -22,7 +22,7 @@ public class PatientCommand : IPatientCommand
 		    @$"SELECT 
 					   [{nameof(PatientDTO.Id)}]								= patient.Id
                       ,[{nameof(PatientDTO.OriginalId)}]                  		= patient.OriginalId
-                      ,[{nameof(PatientDTO.Gender)}]                    		= patient.Sex
+                      ,[{nameof(PatientDTO.Gender)}]                    		= patient.Gender
                       ,[{nameof(PatientDTO.Title)}]                        		= patient.Title
                       ,[{nameof(PatientDTO.GivenName)}]                   		= patient.GivenName
 					  ,[{nameof(PatientDTO.MiddleNames)}]                  		= patient.MiddleNames
@@ -77,7 +77,7 @@ public class PatientCommand : IPatientCommand
                       ,[{nameof(PracticionerDTO.GivenName)}]                    = prac.GivenName
 					  ,[{nameof(PracticionerDTO.MiddleNames)}]                  = prac.MiddleNames
                       ,[{nameof(PracticionerDTO.Surname)}]						= prac.Surname
-                      ,[{nameof(PracticionerDTO.Sex)}]							= prac.Gender
+                      ,[{nameof(PracticionerDTO.Gender)}]						= prac.Gender
   					  ,[{nameof(PracticionerDTO.DateOfBirthUtc)}]               = prac.DateOfBirthUtc                                     
 					                                       
 
@@ -120,7 +120,7 @@ public class PatientCommand : IPatientCommand
 		    @$"SELECT 
 					   [{nameof(PatientDTO.Id)}]								= patient.Id
                       ,[{nameof(PatientDTO.OriginalId)}]                  		= patient.OriginalId
-                      ,[{nameof(PatientDTO.Gender)}]                    		= patient.Sex
+                      ,[{nameof(PatientDTO.Gender)}]                    		= patient.Gender
                       ,[{nameof(PatientDTO.Title)}]                        		= patient.Title
                       ,[{nameof(PatientDTO.GivenName)}]                   		= patient.GivenName
 					  ,[{nameof(PatientDTO.MiddleNames)}]                  		= patient.MiddleNames
@@ -175,7 +175,7 @@ public class PatientCommand : IPatientCommand
                       ,[{nameof(PracticionerDTO.GivenName)}]                    = prac.GivenName
 					  ,[{nameof(PracticionerDTO.MiddleNames)}]                  = prac.MiddleNames
                       ,[{nameof(PracticionerDTO.Surname)}]						= prac.Surname
-                      ,[{nameof(PracticionerDTO.Sex)}]							= prac.Gender
+                      ,[{nameof(PracticionerDTO.Gender)}]						= prac.Gender
   					  ,[{nameof(PracticionerDTO.DateOfBirthUtc)}]               = prac.DateOfBirthUtc                                     
 					                                       
 
@@ -231,15 +231,18 @@ public class PatientCommand : IPatientCommand
 	                
         var entity = @"INSERT INTO [dbo].[Entity]
                         ([Id],
+                         [OriginalId],
                         [EntityType])
                     VALUES
                         (@Id,
+                        @OriginalId,
                         @Type)";
                     
         var entityDefinition = new CommandDefinition(entity, new
         {
             Id = patient.EntityId,
             Type = EntityTypes.Patient,
+            OriginalId = patient.OriginalId
         }, cancellationToken: cancellationToken, transaction: transaction);
                     
         await _connection.ExecuteAsync(entityDefinition);
@@ -295,7 +298,7 @@ public class PatientCommand : IPatientCommand
                    ,[OriginalId]
                    ,[ManagingOrganization]
                    ,[Practicioner]
-                   ,[Sex]
+                   ,[Gender]
                    ,[DateOfBirthUTC]
                    ,[DateOfDeathUTC]
                    ,[Title]
@@ -330,7 +333,7 @@ public class PatientCommand : IPatientCommand
                     @OriginalId,
                     (select Id from dbo.Organization where OriginalId = @Organization),
                     (select Id from dbo.Practicioner where OriginalId = @Practicioner),
-                    @Sex,
+                    @Gender,
                     @DateOfBirthUTC,
                     @DateOfDeathUTC,
                     @Title,
@@ -368,7 +371,7 @@ public class PatientCommand : IPatientCommand
                 Organization = patient.ManagingOrganization.OriginalId,
                 Active = patient.Active,
                 Practicioner = patient.UsualGP?.OriginalId,
-                Sex = patient.Gender,
+                Gender = patient.Gender,
                 DateOfBirthUTC = patient.DateOfBirthUTC,
                 DateOfDeathUTC = patient.DateOfDeathUTC,
                 Title = patient.Title,
@@ -416,7 +419,7 @@ public class PatientCommand : IPatientCommand
                    		[OriginalId] 				= @OriginalId
                    		,[ManagingOrganization] 	= @Organization
                    		,[Practicioner] 			= @Practicioner
-                   		,[Sex] 						= @Sex
+                   		,[Gender] 					= @Gender
                    		,[DateOfBirthUTC] 			= @DateOfBirthUTC
                    		,[DateOfDeathUTC]			= @DateOfDeathUTC
                    		,[Title]					= @Title
@@ -453,7 +456,7 @@ public class PatientCommand : IPatientCommand
 		    Organization = patient.ManagingOrganization.Id,
 		    Active = patient.Active,
 		    Practicioner = patient.UsualGP?.Id,
-		    Sex = patient.Gender,
+		    Gender = patient.Gender,
 		    DateOfBirthUTC = patient.DateOfBirthUTC,
 		    DateOfDeathUTC = patient.DateOfDeathUTC,
 		    Title = patient.Title,

@@ -4,7 +4,8 @@ namespace GPMigratorApp.DTOs;
 
 public class EncounterDTO
 {
-    public string Guid { get; set; }
+    public Guid Id { get; set; }
+    public string OriginalId { get; set; }
     public string? EncounterTransport { get; set; }
     public string? OutcomeOfAttendance { get; set; }
     public string? EmergencyCareDischargeStatus { get; set; }

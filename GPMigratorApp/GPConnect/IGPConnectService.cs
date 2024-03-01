@@ -5,7 +5,7 @@ namespace GPMigratorApp.GPConnect;
 
 public interface IGPConnectService
 {
-    Task<FhirResponse> GetLocalFile();
+    Task<FhirResponse> GetLocalFile(string nhsNumber);
     Task<FhirResponse> SendRequestAsync(HttpMethod method, string requestUrl, string traceId, string sspFrom, string sspTo,
         JsonContent? json = null);
 }

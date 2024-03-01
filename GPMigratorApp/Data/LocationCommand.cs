@@ -95,15 +95,18 @@ public class LocationCommand : ILocationCommand
                     
         var entity = @"INSERT INTO [dbo].[Entity]
                         ([Id],
+                         [OriginalId],
                         [EntityType])
                     VALUES
                         (@Id,
+                        @OriginalId,
                         @Type)";
                     
         var entityDefinition = new CommandDefinition(entity, new
         {
             Id = location.EntityId,
             Type = EntityTypes.Location,
+            OriginalId = location.OriginalId
         }, cancellationToken: cancellationToken, transaction: transaction);
                     
         await _connection.ExecuteAsync(entityDefinition);

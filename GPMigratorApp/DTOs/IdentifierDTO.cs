@@ -13,12 +13,15 @@ public class IdentifierDTO
         if (identifier is not null)
         {
             Use = identifier.Use?.ToString();
-            Type = identifier.Type.Text;
+            Type = identifier.Type?.Text;
             System = identifier.System;
             Value = identifier.Value;
-            Period = new PeriodDTO(identifier.Period);
-            Assigner = identifier.Assigner.Reference;
+            Assigner = identifier.Assigner?.Reference;
+            
+            if(identifier.Period is not null)
+                Period = new PeriodDTO(identifier.Period);
         }
+        
     }
     
     public string? Use { get; set; }

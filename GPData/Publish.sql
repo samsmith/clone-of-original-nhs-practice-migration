@@ -16,8 +16,8 @@ GO
 :setvar RunAutomatedScripts "false"
 :setvar DatabaseName "GPData"
 :setvar DefaultFilePrefix "GPData"
-:setvar DefaultDataPath "/var/opt/mssql/data/"
-:setvar DefaultLogPath "/var/opt/mssql/data/"
+:setvar DefaultDataPath "C:\Program Files\Microsoft SQL Server\MSSQL15.MSSQLSERVER\MSSQL\DATA\"
+:setvar DefaultLogPath "C:\Program Files\Microsoft SQL Server\MSSQL15.MSSQLSERVER\MSSQL\DATA\"
 
 GO
 :on error exit
@@ -73,226 +73,891 @@ BEGIN
             BACKUP DATABASE [$(DatabaseName)] TO DISK = @fn
 END
 GO
+USE [master];
+
+
+GO
+
+IF (DB_ID(N'$(DatabaseName)') IS NOT NULL) 
+BEGIN
+    ALTER DATABASE [$(DatabaseName)]
+    SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
+    DROP DATABASE [$(DatabaseName)];
+END
+
+GO
+PRINT N'Creating database $(DatabaseName)...'
+GO
+CREATE DATABASE [$(DatabaseName)]
+    ON 
+    PRIMARY(NAME = [$(DatabaseName)], FILENAME = N'$(DefaultDataPath)$(DefaultFilePrefix)_Primary.mdf')
+    LOG ON (NAME = [$(DatabaseName)_log], FILENAME = N'$(DefaultLogPath)$(DefaultFilePrefix)_Primary.ldf') COLLATE SQL_Latin1_General_CP1_CI_AS
+GO
+IF EXISTS (SELECT 1
+           FROM   [master].[dbo].[sysdatabases]
+           WHERE  [name] = N'$(DatabaseName)')
+    BEGIN
+        ALTER DATABASE [$(DatabaseName)]
+            SET AUTO_CLOSE OFF 
+            WITH ROLLBACK IMMEDIATE;
+    END
+
+
+GO
 USE [$(DatabaseName)];
 
 
 GO
-PRINT N'Dropping SqlForeignKeyConstraint unnamed constraint on [dbo].[Observation]...';
+IF EXISTS (SELECT 1
+           FROM   [master].[dbo].[sysdatabases]
+           WHERE  [name] = N'$(DatabaseName)')
+    BEGIN
+        ALTER DATABASE [$(DatabaseName)]
+            SET ANSI_NULLS ON,
+                ANSI_PADDING ON,
+                ANSI_WARNINGS ON,
+                ARITHABORT ON,
+                CONCAT_NULL_YIELDS_NULL ON,
+                NUMERIC_ROUNDABORT OFF,
+                QUOTED_IDENTIFIER ON,
+                ANSI_NULL_DEFAULT ON,
+                CURSOR_DEFAULT LOCAL,
+                RECOVERY FULL,
+                CURSOR_CLOSE_ON_COMMIT OFF,
+                AUTO_CREATE_STATISTICS ON,
+                AUTO_SHRINK OFF,
+                AUTO_UPDATE_STATISTICS ON,
+                RECURSIVE_TRIGGERS OFF 
+            WITH ROLLBACK IMMEDIATE;
+    END
 
 
 GO
-ALTER TABLE [dbo].[Observation] DROP CONSTRAINT [FK__Observati__Perfo__5AB9788F];
+IF EXISTS (SELECT 1
+           FROM   [master].[dbo].[sysdatabases]
+           WHERE  [name] = N'$(DatabaseName)')
+    BEGIN
+        ALTER DATABASE [$(DatabaseName)]
+            SET ALLOW_SNAPSHOT_ISOLATION OFF;
+    END
 
 
 GO
-PRINT N'Dropping SqlForeignKeyConstraint unnamed constraint on [dbo].[DiagnosticReport]...';
+IF EXISTS (SELECT 1
+           FROM   [master].[dbo].[sysdatabases]
+           WHERE  [name] = N'$(DatabaseName)')
+    BEGIN
+        ALTER DATABASE [$(DatabaseName)]
+            SET READ_COMMITTED_SNAPSHOT OFF 
+            WITH ROLLBACK IMMEDIATE;
+    END
 
 
 GO
-ALTER TABLE [dbo].[DiagnosticReport] DROP CONSTRAINT [FK__Diagnosti__Resul__3493CFA7];
+IF EXISTS (SELECT 1
+           FROM   [master].[dbo].[sysdatabases]
+           WHERE  [name] = N'$(DatabaseName)')
+    BEGIN
+        ALTER DATABASE [$(DatabaseName)]
+            SET AUTO_UPDATE_STATISTICS_ASYNC OFF,
+                PAGE_VERIFY NONE,
+                DATE_CORRELATION_OPTIMIZATION OFF,
+                DISABLE_BROKER,
+                PARAMETERIZATION SIMPLE,
+                SUPPLEMENTAL_LOGGING OFF 
+            WITH ROLLBACK IMMEDIATE;
+    END
 
 
 GO
-PRINT N'Dropping SqlForeignKeyConstraint [dbo].[FK__Immunizat__React__74AE54BC]...';
+IF IS_SRVROLEMEMBER(N'sysadmin') = 1
+    BEGIN
+        IF EXISTS (SELECT 1
+                   FROM   [master].[dbo].[sysdatabases]
+                   WHERE  [name] = N'$(DatabaseName)')
+            BEGIN
+                EXECUTE sp_executesql N'ALTER DATABASE [$(DatabaseName)]
+    SET TRUSTWORTHY OFF,
+        DB_CHAINING OFF 
+    WITH ROLLBACK IMMEDIATE';
+            END
+    END
+ELSE
+    BEGIN
+        PRINT N'The database settings cannot be modified. You must be a SysAdmin to apply these settings.';
+    END
 
 
 GO
-ALTER TABLE [dbo].[Immunization] DROP CONSTRAINT [FK__Immunizat__React__74AE54BC];
+IF IS_SRVROLEMEMBER(N'sysadmin') = 1
+    BEGIN
+        IF EXISTS (SELECT 1
+                   FROM   [master].[dbo].[sysdatabases]
+                   WHERE  [name] = N'$(DatabaseName)')
+            BEGIN
+                EXECUTE sp_executesql N'ALTER DATABASE [$(DatabaseName)]
+    SET HONOR_BROKER_PRIORITY OFF 
+    WITH ROLLBACK IMMEDIATE';
+            END
+    END
+ELSE
+    BEGIN
+        PRINT N'The database settings cannot be modified. You must be a SysAdmin to apply these settings.';
+    END
 
 
 GO
-PRINT N'Dropping SqlForeignKeyConstraint [dbo].[FK__Observati__Subje__40F9A68C]...';
+ALTER DATABASE [$(DatabaseName)]
+    SET TARGET_RECOVERY_TIME = 0 SECONDS 
+    WITH ROLLBACK IMMEDIATE;
 
 
 GO
-ALTER TABLE [dbo].[Observation] DROP CONSTRAINT [FK__Observati__Subje__40F9A68C];
+IF EXISTS (SELECT 1
+           FROM   [master].[dbo].[sysdatabases]
+           WHERE  [name] = N'$(DatabaseName)')
+    BEGIN
+        ALTER DATABASE [$(DatabaseName)]
+            SET FILESTREAM(NON_TRANSACTED_ACCESS = OFF),
+                CONTAINMENT = NONE 
+            WITH ROLLBACK IMMEDIATE;
+    END
 
 
 GO
-PRINT N'Dropping SqlForeignKeyConstraint [dbo].[FK__Observati__Conte__534D60F1]...';
+IF EXISTS (SELECT 1
+           FROM   [master].[dbo].[sysdatabases]
+           WHERE  [name] = N'$(DatabaseName)')
+    BEGIN
+        ALTER DATABASE [$(DatabaseName)]
+            SET AUTO_CREATE_STATISTICS ON(INCREMENTAL = OFF),
+                MEMORY_OPTIMIZED_ELEVATE_TO_SNAPSHOT = OFF,
+                DELAYED_DURABILITY = DISABLED 
+            WITH ROLLBACK IMMEDIATE;
+    END
 
 
 GO
-ALTER TABLE [dbo].[Observation] DROP CONSTRAINT [FK__Observati__Conte__534D60F1];
+IF EXISTS (SELECT 1
+           FROM   [master].[dbo].[sysdatabases]
+           WHERE  [name] = N'$(DatabaseName)')
+    BEGIN
+        ALTER DATABASE [$(DatabaseName)]
+            SET QUERY_STORE (QUERY_CAPTURE_MODE = AUTO, OPERATION_MODE = READ_WRITE, DATA_FLUSH_INTERVAL_SECONDS = 900, INTERVAL_LENGTH_MINUTES = 60, MAX_PLANS_PER_QUERY = 200, CLEANUP_POLICY = (STALE_QUERY_THRESHOLD_DAYS = 30), MAX_STORAGE_SIZE_MB = 100) 
+            WITH ROLLBACK IMMEDIATE;
+    END
 
 
 GO
-PRINT N'Dropping SqlForeignKeyConstraint [dbo].[FK_Patient_Address_Patient]...';
+IF EXISTS (SELECT 1
+           FROM   [master].[dbo].[sysdatabases]
+           WHERE  [name] = N'$(DatabaseName)')
+    BEGIN
+        ALTER DATABASE SCOPED CONFIGURATION SET MAXDOP = 8;
+        ALTER DATABASE SCOPED CONFIGURATION FOR SECONDARY SET MAXDOP = PRIMARY;
+        ALTER DATABASE SCOPED CONFIGURATION SET LEGACY_CARDINALITY_ESTIMATION = OFF;
+        ALTER DATABASE SCOPED CONFIGURATION FOR SECONDARY SET LEGACY_CARDINALITY_ESTIMATION = PRIMARY;
+        ALTER DATABASE SCOPED CONFIGURATION SET PARAMETER_SNIFFING = ON;
+        ALTER DATABASE SCOPED CONFIGURATION FOR SECONDARY SET PARAMETER_SNIFFING = PRIMARY;
+        ALTER DATABASE SCOPED CONFIGURATION SET QUERY_OPTIMIZER_HOTFIXES = OFF;
+        ALTER DATABASE SCOPED CONFIGURATION FOR SECONDARY SET QUERY_OPTIMIZER_HOTFIXES = PRIMARY;
+    END
 
 
 GO
-ALTER TABLE [dbo].[Patient_Address] DROP CONSTRAINT [FK_Patient_Address_Patient];
+IF EXISTS (SELECT 1
+           FROM   [master].[dbo].[sysdatabases]
+           WHERE  [name] = N'$(DatabaseName)')
+    BEGIN
+        ALTER DATABASE [$(DatabaseName)]
+            SET TEMPORAL_HISTORY_RETENTION ON 
+            WITH ROLLBACK IMMEDIATE;
+    END
 
 
 GO
-PRINT N'Dropping SqlForeignKeyConstraint [dbo].[FK__Immunizat__Subje__6FE99F9F]...';
+IF fulltextserviceproperty(N'IsFulltextInstalled') = 1
+    EXECUTE sp_fulltext_database 'enable';
 
 
 GO
-ALTER TABLE [dbo].[Immunization] DROP CONSTRAINT [FK__Immunizat__Subje__6FE99F9F];
+PRINT N'Dropping Permission Permission...';
 
 
 GO
-PRINT N'Dropping SqlForeignKeyConstraint [dbo].[FK__Medicatio__Patie__3E1D39E1]...';
+REVOKE VIEW ANY COLUMN ENCRYPTION KEY DEFINITION TO PUBLIC CASCADE;
 
 
 GO
-ALTER TABLE [dbo].[MedicationStatement] DROP CONSTRAINT [FK__Medicatio__Patie__3E1D39E1];
+PRINT N'Dropping Permission Permission...';
 
 
 GO
-PRINT N'Dropping SqlForeignKeyConstraint [dbo].[FK_Compositio_Patient]...';
+REVOKE VIEW ANY COLUMN MASTER KEY DEFINITION TO PUBLIC CASCADE;
 
 
 GO
-ALTER TABLE [dbo].[Composition] DROP CONSTRAINT [FK_Compositio_Patient];
+PRINT N'Creating Table [dbo].[ActivityDefinition]...';
 
 
 GO
-PRINT N'Dropping SqlForeignKeyConstraint [dbo].[FK_ReferralRequest_Patient]...';
+CREATE TABLE [dbo].[ActivityDefinition] (
+    [Id]                    UNIQUEIDENTIFIER NOT NULL,
+    [IdentifierId]          UNIQUEIDENTIFIER NULL,
+    [Version]               NVARCHAR (50)    NULL,
+    [Name]                  NVARCHAR (50)    NULL,
+    [Title]                 NVARCHAR (50)    NULL,
+    [Status]                NVARCHAR (50)    NULL,
+    [Experimental]          BIT              NULL,
+    [Date]                  DATETIME         NULL,
+    [Publisher]             NVARCHAR (50)    NULL,
+    [Description]           NVARCHAR (MAX)   NULL,
+    [Purpose]               NVARCHAR (MAX)   NULL,
+    [Usage]                 NVARCHAR (MAX)   NULL,
+    [ApprovalDate]          DATETIME         NULL,
+    [LastReviewDate]        DATETIME         NULL,
+    [EffectiveStart]        DATETIME         NULL,
+    [EffectiveEnd]          DATETIME         NULL,
+    [UsageContextCode]      NVARCHAR (50)    NULL,
+    [UsageContextQuantity]  DECIMAL (18, 2)  NULL,
+    [UsageContextRangeLow]  INT              NULL,
+    [UsageContextRangeHigh] INT              NULL,
+    [Jurisdiction]          NVARCHAR (50)    NULL,
+    [Topic]                 NVARCHAR (50)    NULL,
+    [Contributor]           NVARCHAR (50)    NULL,
+    [Contact]               NVARCHAR (50)    NULL,
+    [Copyright]             NVARCHAR (50)    NULL,
+    [RelatedArtifactId]     UNIQUEIDENTIFIER NULL,
+    [Library]               NVARCHAR (50)    NULL,
+    [Code]                  NVARCHAR (50)    NULL,
+    [TimingDate]            DATETIME         NULL,
+    [TimingPeriodStart]     DATETIME         NULL,
+    [TimingPeriodEnd]       DATETIME         NULL,
+    [TimingRangeLow]        INT              NULL,
+    [TimingRangeHigh]       INT              NULL,
+    [LocationId]            UNIQUEIDENTIFIER NULL,
+    [ParticipantType]       NVARCHAR (50)    NULL,
+    [ParticipantRoleId]     NVARCHAR (50)    NULL,
+    [ProductId]             UNIQUEIDENTIFIER NULL,
+    [Quantity]              INT              NULL,
+    [DosageId]              UNIQUEIDENTIFIER NULL,
+    [BodySite]              NVARCHAR (50)    NULL,
+    [TransformId]           UNIQUEIDENTIFIER NULL,
+    PRIMARY KEY CLUSTERED ([Id] ASC)
+);
 
 
 GO
-ALTER TABLE [dbo].[ReferralRequest] DROP CONSTRAINT [FK_ReferralRequest_Patient];
+PRINT N'Creating Table [dbo].[Address]...';
 
 
 GO
-PRINT N'Dropping SqlForeignKeyConstraint [dbo].[FK__Specimen__Subjec__6FB49575]...';
+CREATE TABLE [dbo].[Address] (
+    [Id]                  UNIQUEIDENTIFIER NOT NULL,
+    [Use]                 NVARCHAR (255)   NULL,
+    [HouseNameFlatNumber] NVARCHAR (255)   NULL,
+    [NumberAndStreet]     NVARCHAR (255)   NULL,
+    [Village]             NVARCHAR (255)   NULL,
+    [Town]                NVARCHAR (255)   NULL,
+    [County]              NVARCHAR (255)   NULL,
+    [Postcode]            NVARCHAR (20)    NULL,
+    [From]                DATETIME         NULL,
+    [To]                  DATETIME         NULL,
+    PRIMARY KEY CLUSTERED ([Id] ASC)
+);
 
 
 GO
-ALTER TABLE [dbo].[Specimen] DROP CONSTRAINT [FK__Specimen__Subjec__6FB49575];
+PRINT N'Creating Table [dbo].[AllergyIntollerance]...';
 
 
 GO
-PRINT N'Dropping SqlForeignKeyConstraint [dbo].[FK__Encounter__Patie__412EB0B6]...';
+CREATE TABLE [dbo].[AllergyIntollerance] (
+    [Id]                    UNIQUEIDENTIFIER NOT NULL,
+    [Identifier]            UNIQUEIDENTIFIER NULL,
+    [ReasonEnded]           NVARCHAR (MAX)   NULL,
+    [OnsetDate]             DATETIME         NULL,
+    [OnsetAge]              DECIMAL (18, 2)  NULL,
+    [OnsetPeriodStart]      DATETIME         NULL,
+    [OnsetPeriodEnd]        DATETIME         NULL,
+    [AllergyEndDate]        DATETIME         NULL,
+    [ClinicalStatus]        NVARCHAR (MAX)   NULL,
+    [VerificationStatus]    NVARCHAR (MAX)   NULL,
+    [Criticality]           NVARCHAR (MAX)   NULL,
+    [Code]                  NVARCHAR (MAX)   NULL,
+    [Type]                  NVARCHAR (MAX)   NULL,
+    [Category]              NVARCHAR (MAX)   NULL,
+    [Subject]               UNIQUEIDENTIFIER NULL,
+    [AssertedDate]          DATETIME         NULL,
+    [Asserter]              UNIQUEIDENTIFIER NULL,
+    [Recorder]              UNIQUEIDENTIFIER NULL,
+    [LastOccurance]         DATETIME         NULL,
+    [NoteAuthored]          DATETIME         NULL,
+    [NoteAuthor]            UNIQUEIDENTIFIER NULL,
+    [ReactionSubstance]     NVARCHAR (MAX)   NULL,
+    [ReactionManifestation] NVARCHAR (MAX)   NULL,
+    [ReactionDescription]   NVARCHAR (MAX)   NULL,
+    [ReactionExposureRate]  NVARCHAR (MAX)   NULL,
+    [Encounter]             UNIQUEIDENTIFIER NOT NULL,
+    [Evidence]              UNIQUEIDENTIFIER NULL,
+    CONSTRAINT [PK__AllergyI__A2B5777CD5983ADB] PRIMARY KEY CLUSTERED ([Id] ASC)
+);
 
 
 GO
-ALTER TABLE [dbo].[Encounter] DROP CONSTRAINT [FK__Encounter__Patie__412EB0B6];
+PRINT N'Creating Table [dbo].[Appointment]...';
 
 
 GO
-PRINT N'Dropping SqlForeignKeyConstraint [dbo].[FK__AllergyIn__NoteA__31B762FC]...';
+CREATE TABLE [dbo].[Appointment] (
+    [Id]                            UNIQUEIDENTIFIER NOT NULL,
+    [AppointmentCancellationReason] NVARCHAR (255)   NULL,
+    [BookingOrganizationId]         UNIQUEIDENTIFIER NOT NULL,
+    [PracticionerRole]              NVARCHAR (255)   NULL,
+    [DeliveryChannel]               NVARCHAR (255)   NULL,
+    [IdentifierId]                  UNIQUEIDENTIFIER NOT NULL,
+    [Status]                        NVARCHAR (255)   NOT NULL,
+    [ServiceCategory]               NVARCHAR (255)   NULL,
+    [ServiceType]                   NVARCHAR (255)   NULL,
+    [Speciality]                    NVARCHAR (255)   NULL,
+    [Reason]                        NVARCHAR (255)   NULL,
+    [Priority]                      INT              NULL,
+    [Description]                   NVARCHAR (255)   NULL,
+    [Start]                         DATETIME2 (7)    NOT NULL,
+    [End]                           DATETIME2 (7)    NOT NULL,
+    [MinutesDuration]               INT              NULL,
+    [Created]                       DATETIME2 (7)    NULL,
+    [Comment]                       NVARCHAR (255)   NULL,
+    PRIMARY KEY CLUSTERED ([Id] ASC)
+);
 
 
 GO
-ALTER TABLE [dbo].[AllergyIntollerance] DROP CONSTRAINT [FK__AllergyIn__NoteA__31B762FC];
+PRINT N'Creating Table [dbo].[Appointment_Participant]...';
 
 
 GO
-PRINT N'Dropping SqlForeignKeyConstraint [dbo].[FK_Patient_Links_Patient]...';
+CREATE TABLE [dbo].[Appointment_Participant] (
+    [AppointmentId] UNIQUEIDENTIFIER NOT NULL,
+    [ParticipantId] UNIQUEIDENTIFIER NOT NULL
+);
 
 
 GO
-ALTER TABLE [dbo].[Patient_Links] DROP CONSTRAINT [FK_Patient_Links_Patient];
+PRINT N'Creating Table [dbo].[Appointment_Slots]...';
 
 
 GO
-PRINT N'Dropping SqlForeignKeyConstraint [dbo].[FK_Patient_Practicioner]...';
+CREATE TABLE [dbo].[Appointment_Slots] (
+    [AppointmentId] UNIQUEIDENTIFIER NOT NULL,
+    [SlotId]        UNIQUEIDENTIFIER NOT NULL
+);
 
 
 GO
-ALTER TABLE [dbo].[Patient] DROP CONSTRAINT [FK_Patient_Practicioner];
+PRINT N'Creating Table [dbo].[Coding]...';
 
 
 GO
-PRINT N'Dropping SqlForeignKeyConstraint [dbo].[FK_Patient_Organization1]...';
+CREATE TABLE [dbo].[Coding] (
+    [Id]           UNIQUEIDENTIFIER NOT NULL,
+    [ReadCode]     VARCHAR (250)    NULL,
+    [SnomedCode]   VARCHAR (250)    NULL,
+    [LocalCode]    VARCHAR (250)    NULL,
+    [NationalCode] VARCHAR (250)    NULL,
+    [Description]  VARCHAR (250)    NULL,
+    CONSTRAINT [PK_Coding] PRIMARY KEY CLUSTERED ([Id] ASC)
+);
 
 
 GO
-ALTER TABLE [dbo].[Patient] DROP CONSTRAINT [FK_Patient_Organization1];
+PRINT N'Creating Table [dbo].[Composition]...';
 
 
 GO
-PRINT N'Dropping SqlForeignKeyConstraint [dbo].[FK_Patient_Links_Patient1]...';
+CREATE TABLE [dbo].[Composition] (
+    [Id]                         UNIQUEIDENTIFIER NOT NULL,
+    [Identifier]                 UNIQUEIDENTIFIER NULL,
+    [CrossCareSettingIdentifier] UNIQUEIDENTIFIER NULL,
+    [Status]                     NVARCHAR (MAX)   NULL,
+    [Type]                       NVARCHAR (MAX)   NULL,
+    [Class]                      NVARCHAR (MAX)   NULL,
+    [Subject]                    UNIQUEIDENTIFIER NULL,
+    [Encounter]                  UNIQUEIDENTIFIER NULL,
+    [Author]                     UNIQUEIDENTIFIER NULL,
+    [Observation]                NVARCHAR (MAX)   NULL,
+    [Problem]                    NVARCHAR (MAX)   NULL,
+    [Title]                      NVARCHAR (MAX)   NULL,
+    [Code]                       NVARCHAR (MAX)   NULL,
+    [OrderedByCode]              NVARCHAR (MAX)   NULL,
+    [CareSettingType]            NVARCHAR (MAX)   NULL,
+    PRIMARY KEY CLUSTERED ([Id] ASC)
+);
 
 
 GO
-ALTER TABLE [dbo].[Patient_Links] DROP CONSTRAINT [FK_Patient_Links_Patient1];
+PRINT N'Creating Table [dbo].[Condition]...';
 
 
 GO
-PRINT N'Dropping SqlForeignKeyConstraint [dbo].[FK__AllergyIn__Subje__2CF2ADDF]...';
+CREATE TABLE [dbo].[Condition] (
+    [Id]                   UNIQUEIDENTIFIER NOT NULL,
+    [Identifier]           UNIQUEIDENTIFIER NULL,
+    [ActualProblem]        UNIQUEIDENTIFIER NULL,
+    [ProblemSignificance]  NVARCHAR (MAX)   NULL,
+    [Episode]              NVARCHAR (MAX)   NULL,
+    [ClinicalStatus]       NVARCHAR (MAX)   NULL,
+    [VerificationStatus]   NVARCHAR (MAX)   NULL,
+    [Severity]             NVARCHAR (MAX)   NULL,
+    [Code]                 NVARCHAR (MAX)   NULL,
+    [BodySite]             NVARCHAR (MAX)   NULL,
+    [Subject]              UNIQUEIDENTIFIER NULL,
+    [Context]              UNIQUEIDENTIFIER NULL,
+    [OnsetDate]            DATETIME         NULL,
+    [OnsetAge]             DECIMAL (18, 2)  NULL,
+    [OnsetPeriodStart]     DATETIME         NULL,
+    [OnsetPeriodEnd]       DATETIME         NULL,
+    [AbatementDate]        DATETIME         NULL,
+    [AbatementAge]         DECIMAL (18, 2)  NULL,
+    [AbatementPeriodStart] DATETIME         NULL,
+    [AbatementPeriodEnd]   DATETIME         NULL,
+    [Abatement]            BIT              NULL,
+    [AssertedDate]         DATETIME         NOT NULL,
+    [Asserter]             UNIQUEIDENTIFIER NOT NULL,
+    [EvidenceCodes]        NVARCHAR (MAX)   NULL,
+    [NoteText]             NVARCHAR (MAX)   NULL,
+    [NoteAuthored]         DATETIME         NULL,
+    [NoteAuthor]           UNIQUEIDENTIFIER NULL,
+    CONSTRAINT [PK__Conditio__A2B5777CD924092C] PRIMARY KEY CLUSTERED ([Id] ASC)
+);
 
 
 GO
-ALTER TABLE [dbo].[AllergyIntollerance] DROP CONSTRAINT [FK__AllergyIn__Subje__2CF2ADDF];
+PRINT N'Creating Table [dbo].[Condition_Evidence]...';
 
 
 GO
-PRINT N'Dropping SqlForeignKeyConstraint [dbo].[FK_Patient_Patient]...';
+CREATE TABLE [dbo].[Condition_Evidence] (
+    [ConditionId] UNIQUEIDENTIFIER NOT NULL,
+    [EntityId]    UNIQUEIDENTIFIER NOT NULL,
+    [Code]        NCHAR (100)      NULL
+);
 
 
 GO
-ALTER TABLE [dbo].[Patient] DROP CONSTRAINT [FK_Patient_Patient];
+PRINT N'Creating Table [dbo].[Condition_RelatedClinicalConditions]...';
 
 
 GO
-PRINT N'Dropping SqlForeignKeyConstraint [dbo].[FK__Medicatio__Patie__3A4CA8FD]...';
+CREATE TABLE [dbo].[Condition_RelatedClinicalConditions] (
+    [ConditionId] UNIQUEIDENTIFIER NOT NULL,
+    [EntityId]    UNIQUEIDENTIFIER NOT NULL
+);
 
 
 GO
-ALTER TABLE [dbo].[MedicationRequest] DROP CONSTRAINT [FK__Medicatio__Patie__3A4CA8FD];
+PRINT N'Creating Table [dbo].[Condition_RelatedProblems]...';
 
 
 GO
-PRINT N'Dropping SqlForeignKeyConstraint [dbo].[FK__Diagnosti__Subje__1EA48E88]...';
+CREATE TABLE [dbo].[Condition_RelatedProblems] (
+    [ConditionId] UNIQUEIDENTIFIER NOT NULL,
+    [EntityId]    UNIQUEIDENTIFIER NOT NULL
+);
 
 
 GO
-ALTER TABLE [dbo].[DiagnosticReport] DROP CONSTRAINT [FK__Diagnosti__Subje__1EA48E88];
+PRINT N'Creating Table [dbo].[Contact]...';
 
 
 GO
-PRINT N'Dropping SqlForeignKeyConstraint [dbo].[FK_ProcedureRequest_Subject]...';
+CREATE TABLE [dbo].[Contact] (
+    [Id]             UNIQUEIDENTIFIER NOT NULL,
+    [Title]          NVARCHAR (50)    NULL,
+    [GivenName]      NVARCHAR (100)   NOT NULL,
+    [MiddleName]     NVARCHAR (100)   NULL,
+    [Surname]        NVARCHAR (100)   NOT NULL,
+    [AddressID]      UNIQUEIDENTIFIER NULL,
+    [OrganizationId] UNIQUEIDENTIFIER NULL,
+    [Gender]         NVARCHAR (100)   NULL,
+    [Relationship]   NVARCHAR (100)   NULL,
+    [HomePhone]      NVARCHAR (100)   NULL,
+    [MobilePhone]    NVARCHAR (100)   NULL,
+    PRIMARY KEY CLUSTERED ([Id] ASC)
+);
 
 
 GO
-ALTER TABLE [dbo].[ProcedureRequest] DROP CONSTRAINT [FK_ProcedureRequest_Subject];
+PRINT N'Creating Table [dbo].[Device]...';
 
 
 GO
-PRINT N'Dropping SqlForeignKeyConstraint [dbo].[FK_Patient_Organization]...';
+CREATE TABLE [dbo].[Device] (
+    [Id]           UNIQUEIDENTIFIER NOT NULL,
+    [Identifier]   UNIQUEIDENTIFIER NOT NULL,
+    [TypeCode]     NVARCHAR (255)   NULL,
+    [TypeDisplay]  NVARCHAR (255)   NULL,
+    [TypeSystem]   NVARCHAR (255)   NULL,
+    [TypeVersion]  NVARCHAR (255)   NULL,
+    [UserSelected] BIT              NULL,
+    [Manufacturer] NVARCHAR (255)   NULL,
+    [Model]        NVARCHAR (255)   NULL,
+    [Version]      NVARCHAR (255)   NULL,
+    [Owner]        UNIQUEIDENTIFIER NULL,
+    [Locations]    NVARCHAR (255)   NULL,
+    [Name]         NVARCHAR (255)   NULL,
+    [Telecom]      NVARCHAR (255)   NULL,
+    [Address]      UNIQUEIDENTIFIER NULL,
+    [PartOf]       UNIQUEIDENTIFIER NULL,
+    [Contact]      UNIQUEIDENTIFIER NULL,
+    PRIMARY KEY CLUSTERED ([Id] ASC)
+);
 
 
 GO
-ALTER TABLE [dbo].[Patient] DROP CONSTRAINT [FK_Patient_Organization];
+PRINT N'Creating Table [dbo].[DiagnosticReport]...';
 
 
 GO
-PRINT N'Dropping SqlForeignKeyConstraint [dbo].[FK_Patient_Contacts_Patient]...';
+CREATE TABLE [dbo].[DiagnosticReport] (
+    [Id]               UNIQUEIDENTIFIER NOT NULL,
+    [Identifier]       UNIQUEIDENTIFIER NULL,
+    [Status]           NVARCHAR (50)    NULL,
+    [Assigner]         UNIQUEIDENTIFIER NOT NULL,
+    [ProcedureRequest] UNIQUEIDENTIFIER NOT NULL,
+    [Category]         NVARCHAR (50)    NULL,
+    [Code]             NVARCHAR (50)    NULL,
+    [Subject]          UNIQUEIDENTIFIER NOT NULL,
+    [Encounter]        UNIQUEIDENTIFIER NULL,
+    [EffectiveFrom]    DATETIME         NULL,
+    [EffectiveTo]      DATETIME         NULL,
+    [Issued]           DATETIME         NOT NULL,
+    [Performer]        UNIQUEIDENTIFIER NULL,
+    [Specimen]         UNIQUEIDENTIFIER NOT NULL,
+    [Result]           UNIQUEIDENTIFIER NULL,
+    [Conclusion]       NVARCHAR (50)    NULL,
+    [CodedDiagnosis]   NVARCHAR (50)    NULL,
+    [PresentedFrom]    NVARCHAR (50)    NULL,
+    PRIMARY KEY CLUSTERED ([Id] ASC)
+);
 
 
 GO
-ALTER TABLE [dbo].[Patient_Contacts] DROP CONSTRAINT [FK_Patient_Contacts_Patient];
+PRINT N'Creating Table [dbo].[Dosage]...';
 
 
 GO
-PRINT N'Dropping SqlForeignKeyConstraint [dbo].[FK__Condition__Subje__40F9A68C]...';
+CREATE TABLE [dbo].[Dosage] (
+    [Id]                       UNIQUEIDENTIFIER NOT NULL,
+    [Sequence]                 INT              NULL,
+    [Text]                     NVARCHAR (MAX)   NULL,
+    [Timing]                   UNIQUEIDENTIFIER NULL,
+    [AdditionalInstruction]    NVARCHAR (MAX)   NULL,
+    [PatientInstruction]       NVARCHAR (MAX)   NULL,
+    [AsNeeded]                 BIT              NULL,
+    [AsNeededCode]             NVARCHAR (MAX)   NULL,
+    [Site]                     NVARCHAR (MAX)   NULL,
+    [Route]                    NVARCHAR (MAX)   NULL,
+    [Method]                   NVARCHAR (MAX)   NULL,
+    [DoseRangeHigh]            INT              NULL,
+    [DoseRangeLow]             INT              NULL,
+    [Quantity]                 INT              NULL,
+    [MaxDosePerPeriod]         DECIMAL (18, 4)  NULL,
+    [MaxDosePerAdministration] INT              NULL,
+    [MaxDosePerLifetime]       INT              NULL,
+    [RateRatioNumerator]       DECIMAL (18, 4)  NULL,
+    [RateRatioDenominator]     DECIMAL (18, 4)  NULL,
+    [RateRangeLow]             INT              NULL,
+    [RateRangeHigh]            INT              NULL,
+    [RateQuantity]             INT              NULL,
+    PRIMARY KEY CLUSTERED ([Id] ASC)
+);
 
 
 GO
-ALTER TABLE [dbo].[Condition] DROP CONSTRAINT [FK__Condition__Subje__40F9A68C];
+PRINT N'Creating Table [dbo].[Encounter]...';
 
 
 GO
-PRINT N'Starting rebuilding table [dbo].[Observation]...';
+CREATE TABLE [dbo].[Encounter] (
+    [Id]            UNIQUEIDENTIFIER NOT NULL,
+    [Identifier]    NVARCHAR (MAX)   NULL,
+    [Status]        NVARCHAR (MAX)   NULL,
+    [Type]          NVARCHAR (MAX)   NULL,
+    [PatientGuid]   UNIQUEIDENTIFIER NULL,
+    [PerformerId]   UNIQUEIDENTIFIER NULL,
+    [RecorderId]    UNIQUEIDENTIFIER NULL,
+    [PeriodStart]   DATETIME         NULL,
+    [PeriodEnd]     DATETIME         NULL,
+    [DurationValue] DECIMAL (18, 2)  NULL,
+    [DurationUnit]  NVARCHAR (MAX)   NULL,
+    [DurationCode]  NVARCHAR (MAX)   NULL,
+    [EntityId]      UNIQUEIDENTIFIER NOT NULL,
+    CONSTRAINT [PK__Encounte__3214EC075BF916E0] PRIMARY KEY CLUSTERED ([Id] ASC)
+);
 
 
 GO
-BEGIN TRANSACTION;
+PRINT N'Creating Table [dbo].[Entity]...';
 
-SET TRANSACTION ISOLATION LEVEL SERIALIZABLE;
 
-SET XACT_ABORT ON;
+GO
+CREATE TABLE [dbo].[Entity] (
+    [Id]         UNIQUEIDENTIFIER NOT NULL,
+    [OriginalId] NVARCHAR (250)   NULL,
+    [EntityType] INT              NOT NULL,
+    CONSTRAINT [PK_Entity] PRIMARY KEY CLUSTERED ([Id] ASC)
+);
 
-CREATE TABLE [dbo].[tmp_ms_xx_Observation] (
+
+GO
+PRINT N'Creating Table [dbo].[EntityType]...';
+
+
+GO
+CREATE TABLE [dbo].[EntityType] (
+    [EntityType] INT           NOT NULL,
+    [EntityName] NVARCHAR (50) NOT NULL,
+    CONSTRAINT [PK_EntityType] PRIMARY KEY CLUSTERED ([EntityType] ASC)
+);
+
+
+GO
+PRINT N'Creating Table [dbo].[Equipment]...';
+
+
+GO
+CREATE TABLE [dbo].[Equipment] (
+    [Id]           UNIQUEIDENTIFIER NOT NULL,
+    [IdentifierID] NVARCHAR (100)   NULL,
+    [TypeID]       NVARCHAR (100)   NULL,
+    [Manufacturer] NVARCHAR (100)   NOT NULL,
+    [Model]        NVARCHAR (100)   NOT NULL,
+    [Version]      NVARCHAR (50)    NOT NULL,
+    [OwnerID]      UNIQUEIDENTIFIER NULL,
+    [Locations]    NVARCHAR (MAX)   NULL,
+    [Name]         NVARCHAR (255)   NOT NULL,
+    [Telecom]      NVARCHAR (20)    NULL,
+    [AddressID]    UNIQUEIDENTIFIER NULL,
+    [PartOfID]     UNIQUEIDENTIFIER NULL,
+    [ContactID]    UNIQUEIDENTIFIER NULL,
+    [EntityId]     UNIQUEIDENTIFIER NOT NULL,
+    CONSTRAINT [PK__Equipmen__3214EC07B1A029E1] PRIMARY KEY CLUSTERED ([Id] ASC)
+);
+
+
+GO
+PRINT N'Creating Table [dbo].[Identifier]...';
+
+
+GO
+CREATE TABLE [dbo].[Identifier] (
+    [Use]         NVARCHAR (250)   NULL,
+    [Type]        NVARCHAR (250)   NULL,
+    [System]      NVARCHAR (MAX)   NULL,
+    [Value]       NVARCHAR (MAX)   NULL,
+    [PeriodStart] DATETIME         NULL,
+    [PeriodEnd]   DATETIME         NULL,
+    [Assigner]    NVARCHAR (250)   NULL,
+    [Id]          UNIQUEIDENTIFIER NOT NULL,
+    CONSTRAINT [PK_Identifier] PRIMARY KEY CLUSTERED ([Id] ASC)
+);
+
+
+GO
+PRINT N'Creating Table [dbo].[Immunization]...';
+
+
+GO
+CREATE TABLE [dbo].[Immunization] (
+    [Id]                   NVARCHAR (255)   NOT NULL,
+    [Status]               NVARCHAR (255)   NULL,
+    [Type]                 NVARCHAR (255)   NULL,
+    [Class]                NVARCHAR (255)   NULL,
+    [SubjectId]            UNIQUEIDENTIFIER NULL,
+    [EncounterId]          UNIQUEIDENTIFIER NULL,
+    [ActorId]              UNIQUEIDENTIFIER NULL,
+    [LocationId]           UNIQUEIDENTIFIER NOT NULL,
+    [ParentPresent]        BIT              NULL,
+    [RecordedDate]         DATETIME         NULL,
+    [Date]                 DATETIME         NULL,
+    [PrimarySource]        BIT              NULL,
+    [LotNumber]            NVARCHAR (255)   NULL,
+    [Site]                 NVARCHAR (255)   NULL,
+    [Route]                NVARCHAR (255)   NULL,
+    [RouteText]            NVARCHAR (255)   NULL,
+    [NoteAuthorId]         UNIQUEIDENTIFIER NULL,
+    [NoteText]             NVARCHAR (MAX)   NULL,
+    [NoteDate]             DATETIME         NULL,
+    [ExpirationDate]       DATETIME         NULL,
+    [VaccinationProcedure] NVARCHAR (255)   NULL,
+    [VaccinationCode]      NVARCHAR (255)   NULL,
+    [DoseQuantity]         DECIMAL (18, 2)  NULL,
+    [ReactionReported]     BIT              NULL,
+    [ReactionDetailId]     UNIQUEIDENTIFIER NULL,
+    [ReactionDate]         DATETIME         NULL,
+    [DoseSequence]         INT              NULL,
+    [Description]          NVARCHAR (MAX)   NULL,
+    [AuthorityId]          UNIQUEIDENTIFIER NULL,
+    [Series]               NVARCHAR (255)   NULL,
+    [SeriesDoses]          INT              NULL,
+    [TargetDisease]        NVARCHAR (255)   NULL,
+    [DoseStatus]           NVARCHAR (255)   NULL,
+    [DoseStatusReason]     NVARCHAR (255)   NULL,
+    [EntityId]             UNIQUEIDENTIFIER NOT NULL,
+    CONSTRAINT [PK__Immuniza__A2B5777C37B1E40D] PRIMARY KEY CLUSTERED ([Id] ASC)
+);
+
+
+GO
+PRINT N'Creating Table [dbo].[Location]...';
+
+
+GO
+CREATE TABLE [dbo].[Location] (
+    [Id]                     UNIQUEIDENTIFIER NOT NULL,
+    [OriginalId]             NVARCHAR (255)   NOT NULL,
+    [ODSSiteCodeID]          NVARCHAR (50)    NULL,
+    [Status]                 NVARCHAR (50)    NULL,
+    [OperationalStatus]      NVARCHAR (50)    NULL,
+    [Name]                   NVARCHAR (255)   NULL,
+    [Alias]                  NVARCHAR (255)   NULL,
+    [Description]            NVARCHAR (MAX)   NULL,
+    [Type]                   NVARCHAR (50)    NULL,
+    [Telecom]                NVARCHAR (20)    NULL,
+    [AddressID]              UNIQUEIDENTIFIER NULL,
+    [PhysicalType]           NVARCHAR (50)    NULL,
+    [Longitude]              DECIMAL (9, 6)   NULL,
+    [Latitude]               DECIMAL (9, 6)   NULL,
+    [Altitude]               DECIMAL (9, 6)   NULL,
+    [ManagingOrganizationID] UNIQUEIDENTIFIER NULL,
+    [PartOfID]               UNIQUEIDENTIFIER NULL,
+    [EntityId]               UNIQUEIDENTIFIER NOT NULL,
+    CONSTRAINT [PK__Location__3214EC073C4874F8] PRIMARY KEY CLUSTERED ([Id] ASC)
+);
+
+
+GO
+PRINT N'Creating Table [dbo].[Medication]...';
+
+
+GO
+CREATE TABLE [dbo].[Medication] (
+    [Id]               UNIQUEIDENTIFIER NOT NULL,
+    [Code]             UNIQUEIDENTIFIER NOT NULL,
+    [Status]           UNIQUEIDENTIFIER NULL,
+    [IsBrand]          BIT              NULL,
+    [Form]             UNIQUEIDENTIFIER NULL,
+    [Quantity]         DECIMAL (18, 2)  NULL,
+    [BatchNumber]      NVARCHAR (MAX)   NULL,
+    [ExpirationDate]   DATETIME         NULL,
+    [IsOverTheCounter] BIT              NULL,
+    [Manufacturer]     UNIQUEIDENTIFIER NULL,
+    [Ingredient]       UNIQUEIDENTIFIER NULL,
+    [IngredientAmount] DECIMAL (18)     NULL,
+    CONSTRAINT [PK__Medicati__3214EC076C92B62D] PRIMARY KEY CLUSTERED ([Id] ASC)
+);
+
+
+GO
+PRINT N'Creating Table [dbo].[MedicationDispenseRequest]...';
+
+
+GO
+CREATE TABLE [dbo].[MedicationDispenseRequest] (
+    [Id]                          UNIQUEIDENTIFIER NOT NULL,
+    [ValidityPeriodStart]         DATETIME         NULL,
+    [ValidityPeriodEnd]           DATETIME         NULL,
+    [Quantity]                    DECIMAL (18, 2)  NULL,
+    [ExpectedSupplyDurationValue] DECIMAL (18, 2)  NULL,
+    [ExpectedSupplyDurationUnit]  DECIMAL (18, 2)  NULL,
+    [ExpectedSupplyDurationCode]  DECIMAL (18, 2)  NULL,
+    [PerformerGuid]               UNIQUEIDENTIFIER NULL,
+    PRIMARY KEY CLUSTERED ([Id] ASC)
+);
+
+
+GO
+PRINT N'Creating Table [dbo].[MedicationRequest]...';
+
+
+GO
+CREATE TABLE [dbo].[MedicationRequest] (
+    [Id]                                  UNIQUEIDENTIFIER NOT NULL,
+    [NumberOfRepeatPrescriptionsAllowed]  INT              NULL,
+    [NumberOfRepeatPrescriptionsIssued]   INT              NULL,
+    [PrescriptionType]                    UNIQUEIDENTIFIER NULL,
+    [CrossCareIdentifier]                 UNIQUEIDENTIFIER NULL,
+    [GroupIdentifier]                     UNIQUEIDENTIFIER NULL,
+    [Status]                              UNIQUEIDENTIFIER NULL,
+    [Intent]                              UNIQUEIDENTIFIER NULL,
+    [MedicationId]                        UNIQUEIDENTIFIER NULL,
+    [Subject]                             UNIQUEIDENTIFIER NULL,
+    [AuthoredOnUTC]                       DATETIME         NULL,
+    [RecorderGuid]                        UNIQUEIDENTIFIER NULL,
+    [DosageInstructionPatientInstruction] NVARCHAR (MAX)   NULL,
+    [MedicationDispenseRequestId]         UNIQUEIDENTIFIER NULL,
+    [AuthorizationExpiry]                 DATETIME         NULL,
+    [Identifier]                          UNIQUEIDENTIFIER NULL,
+    [Definition]                          UNIQUEIDENTIFIER NULL,
+    [BasedOn]                             UNIQUEIDENTIFIER NULL,
+    [Category]                            UNIQUEIDENTIFIER NULL,
+    [Priority]                            UNIQUEIDENTIFIER NULL,
+    [Context]                             UNIQUEIDENTIFIER NULL,
+    [SupportingInformation]               UNIQUEIDENTIFIER NULL,
+    [RequesterAgent]                      UNIQUEIDENTIFIER NULL,
+    [RequesterOnBehalfOf]                 UNIQUEIDENTIFIER NULL,
+    [Recorder]                            UNIQUEIDENTIFIER NULL,
+    [Reason]                              UNIQUEIDENTIFIER NULL,
+    [NoteAuthor]                          UNIQUEIDENTIFIER NULL,
+    [Note]                                NVARCHAR (MAX)   NULL,
+    [Dosage]                              UNIQUEIDENTIFIER NULL,
+    CONSTRAINT [PK__Medicati__3214EC07905EAC71] PRIMARY KEY CLUSTERED ([Id] ASC)
+);
+
+
+GO
+PRINT N'Creating Table [dbo].[MedicationStatement]...';
+
+
+GO
+CREATE TABLE [dbo].[MedicationStatement] (
+    [Id]                       UNIQUEIDENTIFIER NOT NULL,
+    [Status]                   NVARCHAR (MAX)   NULL,
+    [PrescribingAgencyCode]    NVARCHAR (MAX)   NULL,
+    [PrescribingAgencyDisplay] NVARCHAR (MAX)   NULL,
+    [LastIssueDateUTC]         DATETIME         NULL,
+    [DateAssertedUTC]          DATETIME         NULL,
+    [DosageLastChanged]        DATETIME         NULL,
+    [MedicationId]             UNIQUEIDENTIFIER NULL,
+    [EffectivePeriodStart]     DATETIME         NULL,
+    [EffectivePeriodEnd]       DATETIME         NULL,
+    [Subject]                  UNIQUEIDENTIFIER NULL,
+    [Taken]                    NVARCHAR (MAX)   NULL,
+    [Identifier]               UNIQUEIDENTIFIER NULL,
+    [Dosage]                   UNIQUEIDENTIFIER NULL,
+    [BasedOn]                  UNIQUEIDENTIFIER NULL,
+    [PartOf]                   UNIQUEIDENTIFIER NULL,
+    [Context]                  UNIQUEIDENTIFIER NULL,
+    [Category]                 NVARCHAR (MAX)   NULL,
+    [InformationSource]        UNIQUEIDENTIFIER NULL,
+    [ReasonReference]          UNIQUEIDENTIFIER NULL,
+    PRIMARY KEY CLUSTERED ([Id] ASC)
+);
+
+
+GO
+PRINT N'Creating Table [dbo].[Observation]...';
+
+
+GO
+CREATE TABLE [dbo].[Observation] (
     [Id]                      UNIQUEIDENTIFIER NOT NULL,
     [OriginalId]              NVARCHAR (200)   NULL,
     [Status]                  NVARCHAR (MAX)   NULL,
     [Category]                NVARCHAR (MAX)   NULL,
-    [Code]                    NVARCHAR (MAX)   NULL,
+    [Code]                    UNIQUEIDENTIFIER NULL,
+    [BasedOn]                 UNIQUEIDENTIFIER NULL,
     [SubjectId]               UNIQUEIDENTIFIER NULL,
     [ContextId]               UNIQUEIDENTIFIER NULL,
     [EffectiveDate]           DATETIME         NULL,
@@ -306,66 +971,71 @@ CREATE TABLE [dbo].[tmp_ms_xx_Observation] (
     [BodySite]                NVARCHAR (MAX)   NULL,
     [Method]                  NVARCHAR (MAX)   NULL,
     [Device]                  UNIQUEIDENTIFIER NULL,
-    [ReferenceRangeLow]       INT              NULL,
-    [ReferenceRangeHigh]      INT              NULL,
+    [ReferenceText]           NVARCHAR (200)   NULL,
+    [ReferenceRangeLow]       DECIMAL (18, 2)  NULL,
+    [ReferenceRangeLowUnit]   NVARCHAR (200)   NULL,
+    [ReferenceRangeHigh]      DECIMAL (18, 2)  NULL,
+    [ReferenceRangeHighUnit]  NVARCHAR (200)   NULL,
     [ReferenceRangeType]      NVARCHAR (MAX)   NULL,
     [ReferenceRangeAppliesTo] NVARCHAR (MAX)   NULL,
-    [ReferenceRangeAge]       NVARCHAR (MAX)   NULL,
+    [ReferenceRangeAgeHigh]   DECIMAL (18, 2)  NULL,
+    [ReferenceRangeAgeLow]    DECIMAL (18, 2)  NULL,
     [RelatedTo]               UNIQUEIDENTIFIER NULL,
     [Entityid]                UNIQUEIDENTIFIER NULL,
     PRIMARY KEY CLUSTERED ([Id] ASC)
 );
 
-IF EXISTS (SELECT TOP 1 1 
-           FROM   [dbo].[Observation])
-    BEGIN
-        INSERT INTO [dbo].[tmp_ms_xx_Observation] ([Id], [Status], [Category], [Code], [SubjectId], [ContextId], [EffectiveDate], [EffectiveDateFrom], [EffectiveDateTo], [Issued], [PerformerId])
-        SELECT   [Id],
-                 [Status],
-                 [Category],
-                 [Code],
-                 [SubjectId],
-                 [ContextId],
-                 [EffectiveDate],
-                 [EffectiveDateFrom],
-                 [EffectiveDateTo],
-                 [Issued],
-                 [PerformerId]
-        FROM     [dbo].[Observation]
-        ORDER BY [Id] ASC;
-    END
 
-DROP TABLE [dbo].[Observation];
-
-EXECUTE sp_rename N'[dbo].[tmp_ms_xx_Observation]', N'Observation';
-
-COMMIT TRANSACTION;
-
-SET TRANSACTION ISOLATION LEVEL READ COMMITTED;
+GO
+PRINT N'Creating Table [dbo].[Organization]...';
 
 
 GO
-/*
-The column [dbo].[Patient].[OriginalId] on table [dbo].[Patient] must be added, but the column has no default value and does not allow NULL values. If the table contains data, the ALTER script will not work. To avoid this issue you must either: add a default value to the column, mark it as allowing NULL values, or enable the generation of smart-defaults as a deployment option.
-*/
-GO
-PRINT N'Starting rebuilding table [dbo].[Patient]...';
+CREATE TABLE [dbo].[Organization] (
+    [Id]             UNIQUEIDENTIFIER NOT NULL,
+    [OriginalId]     NVARCHAR (255)   NOT NULL,
+    [ODSCode]        NVARCHAR (20)    NULL,
+    [PeriodStart]    DATETIME         NULL,
+    [PeriodEnd]      DATETIME         NULL,
+    [Type]           NVARCHAR (50)    NOT NULL,
+    [Name]           NVARCHAR (255)   NOT NULL,
+    [Telecom]        NVARCHAR (20)    NULL,
+    [MainLocationID] UNIQUEIDENTIFIER NULL,
+    [AddressID]      UNIQUEIDENTIFIER NULL,
+    [PartOfID]       UNIQUEIDENTIFIER NULL,
+    [ContactID]      UNIQUEIDENTIFIER NULL,
+    [EntityId]       UNIQUEIDENTIFIER NOT NULL,
+    CONSTRAINT [PK__Organiza__3214EC07861ED8BE] PRIMARY KEY CLUSTERED ([Id] ASC)
+);
 
 
 GO
-BEGIN TRANSACTION;
+PRINT N'Creating Table [dbo].[Participant]...';
 
-SET TRANSACTION ISOLATION LEVEL SERIALIZABLE;
 
-SET XACT_ABORT ON;
+GO
+CREATE TABLE [dbo].[Participant] (
+    [Id]       UNIQUEIDENTIFIER NOT NULL,
+    [Type]     NVARCHAR (MAX)   NULL,
+    [Actor]    UNIQUEIDENTIFIER NULL,
+    [Required] NVARCHAR (MAX)   NULL,
+    [Status]   NVARCHAR (MAX)   NULL,
+    CONSTRAINT [PK_Participant] PRIMARY KEY CLUSTERED ([Id] ASC)
+);
 
-CREATE TABLE [dbo].[tmp_ms_xx_Patient] (
+
+GO
+PRINT N'Creating Table [dbo].[Patient]...';
+
+
+GO
+CREATE TABLE [dbo].[Patient] (
     [Id]                       UNIQUEIDENTIFIER NOT NULL,
     [OriginalId]               NVARCHAR (255)   NOT NULL,
     [ManagingOrganization]     UNIQUEIDENTIFIER NOT NULL,
     [Practicioner]             UNIQUEIDENTIFIER NOT NULL,
     [HomeAddress]              UNIQUEIDENTIFIER NULL,
-    [Sex]                      NVARCHAR (255)   NULL,
+    [Gender]                   NVARCHAR (255)   NULL,
     [DateOfBirthUTC]           DATETIME         NOT NULL,
     [DateOfDeathUTC]           DATETIME         NULL,
     [Title]                    NVARCHAR (255)   NULL,
@@ -395,377 +1065,1772 @@ CREATE TABLE [dbo].[tmp_ms_xx_Patient] (
     [Religion]                 NVARCHAR (255)   NULL,
     [NominatedPharmacy]        UNIQUEIDENTIFIER NULL,
     [EntityId]                 UNIQUEIDENTIFIER NULL,
-    CONSTRAINT [tmp_ms_xx_constraint_PK__Patient__DBA60F19AE6332BC1] PRIMARY KEY CLUSTERED ([Id] ASC)
+    CONSTRAINT [PK__Patient__DBA60F19AE6332BC] PRIMARY KEY CLUSTERED ([Id] ASC)
 );
 
-IF EXISTS (SELECT TOP 1 1 
-           FROM   [dbo].[Patient])
-    BEGIN
-        INSERT INTO [dbo].[tmp_ms_xx_Patient] ([Id], [ManagingOrganization], [Practicioner], [Sex], [DateOfBirthUTC], [DateOfDeathUTC], [Title], [GivenName], [MiddleNames], [Surname], [DateOfRegistrationUTC], [NhsNumber], [PatientNumber], [PatientTypeDescription], [DummyType], [ResidentialInstituteCode], [NHSNumberStatus], [CarerName], [CarerRelation], [PersonGuid], [DateOfDeactivation], [Deleted], [Active], [SpineSensitive], [IsConfidential], [EmailAddress], [HomePhone], [MobilePhone], [ProcessingId], [Ethnicity], [Religion], [NominatedPharmacy])
-        SELECT   [Id],
-                 [ManagingOrganization],
-                 [Practicioner],
-                 [Sex],
-                 [DateOfBirthUTC],
-                 [DateOfDeathUTC],
-                 [Title],
-                 [GivenName],
-                 [MiddleNames],
-                 [Surname],
-                 [DateOfRegistrationUTC],
-                 [NhsNumber],
-                 [PatientNumber],
-                 [PatientTypeDescription],
-                 [DummyType],
-                 [ResidentialInstituteCode],
-                 [NHSNumberStatus],
-                 [CarerName],
-                 [CarerRelation],
-                 [PersonGuid],
-                 [DateOfDeactivation],
-                 [Deleted],
-                 [Active],
-                 [SpineSensitive],
-                 [IsConfidential],
-                 [EmailAddress],
-                 [HomePhone],
-                 [MobilePhone],
-                 [ProcessingId],
-                 [Ethnicity],
-                 [Religion],
-                 [NominatedPharmacy]
-        FROM     [dbo].[Patient]
-        ORDER BY [Id] ASC;
-    END
 
-DROP TABLE [dbo].[Patient];
-
-EXECUTE sp_rename N'[dbo].[tmp_ms_xx_Patient]', N'Patient';
-
-EXECUTE sp_rename N'[dbo].[tmp_ms_xx_constraint_PK__Patient__DBA60F19AE6332BC1]', N'PK__Patient__DBA60F19AE6332BC', N'OBJECT';
-
-COMMIT TRANSACTION;
-
-SET TRANSACTION ISOLATION LEVEL READ COMMITTED;
+GO
+PRINT N'Creating Table [dbo].[Patient_Address]...';
 
 
 GO
-PRINT N'Creating SqlForeignKeyConstraint unnamed constraint on [dbo].[Observation]...';
+CREATE TABLE [dbo].[Patient_Address] (
+    [PatientId] UNIQUEIDENTIFIER NOT NULL,
+    [AddressId] UNIQUEIDENTIFIER NOT NULL,
+    CONSTRAINT [PK_Patient_Address] PRIMARY KEY CLUSTERED ([PatientId] ASC, [AddressId] ASC)
+);
 
 
 GO
-WAITFOR DELAY '00:00.010';
-
-ALTER TABLE [dbo].[Observation] WITH NOCHECK
-    ADD FOREIGN KEY ([PerformerId]) REFERENCES [dbo].[Practicioner] ([Id]);
+PRINT N'Creating Table [dbo].[Patient_Contacts]...';
 
 
 GO
-PRINT N'Creating SqlForeignKeyConstraint unnamed constraint on [dbo].[DiagnosticReport]...';
+CREATE TABLE [dbo].[Patient_Contacts] (
+    [PatientId] UNIQUEIDENTIFIER NOT NULL,
+    [ContactId] UNIQUEIDENTIFIER NOT NULL
+);
 
 
 GO
-WAITFOR DELAY '00:00.010';
-
-ALTER TABLE [dbo].[DiagnosticReport] WITH NOCHECK
-    ADD FOREIGN KEY ([Result]) REFERENCES [dbo].[Observation] ([Id]);
+PRINT N'Creating Table [dbo].[Patient_Links]...';
 
 
 GO
-PRINT N'Creating SqlForeignKeyConstraint [dbo].[FK__Immunizat__React__74AE54BC]...';
+CREATE TABLE [dbo].[Patient_Links] (
+    [PatientId]     UNIQUEIDENTIFIER NOT NULL,
+    [LinkedPatient] UNIQUEIDENTIFIER NULL,
+    [LinkedContact] UNIQUEIDENTIFIER NULL
+);
 
 
 GO
-WAITFOR DELAY '00:00.010';
-
-ALTER TABLE [dbo].[Immunization] WITH NOCHECK
-    ADD CONSTRAINT [FK__Immunizat__React__74AE54BC] FOREIGN KEY ([ReactionDetailId]) REFERENCES [dbo].[Observation] ([Id]);
+PRINT N'Creating Table [dbo].[Practicioner]...';
 
 
 GO
-PRINT N'Creating SqlForeignKeyConstraint [dbo].[FK__Observati__Subje__40F9A68C]...';
+CREATE TABLE [dbo].[Practicioner] (
+    [Id]               UNIQUEIDENTIFIER NOT NULL,
+    [OriginalId]       NVARCHAR (255)   NOT NULL,
+    [SdsUserId]        NVARCHAR (50)    NULL,
+    [SdsRoleProfileId] NVARCHAR (50)    NULL,
+    [Title]            NVARCHAR (20)    NULL,
+    [GivenName]        NVARCHAR (100)   NULL,
+    [MiddleNames]      NVARCHAR (250)   NULL,
+    [Surname]          NVARCHAR (100)   NOT NULL,
+    [Gender]           NVARCHAR (10)    NULL,
+    [DateOfBirthUtc]   DATETIME         NULL,
+    [AddressID]        UNIQUEIDENTIFIER NULL,
+    PRIMARY KEY CLUSTERED ([Id] ASC)
+);
 
 
 GO
-WAITFOR DELAY '00:00.010';
-
-ALTER TABLE [dbo].[Observation] WITH NOCHECK
-    ADD CONSTRAINT [FK__Observati__Subje__40F9A68C] FOREIGN KEY ([SubjectId]) REFERENCES [dbo].[Patient] ([Id]);
+PRINT N'Creating Table [dbo].[Practicioner_Address]...';
 
 
 GO
-PRINT N'Creating SqlForeignKeyConstraint [dbo].[FK__Observati__Conte__534D60F1]...';
+CREATE TABLE [dbo].[Practicioner_Address] (
+    [PracticionerId] UNIQUEIDENTIFIER NOT NULL,
+    [AddressId]      UNIQUEIDENTIFIER NOT NULL
+);
 
 
 GO
-WAITFOR DELAY '00:00.010';
-
-ALTER TABLE [dbo].[Observation] WITH NOCHECK
-    ADD CONSTRAINT [FK__Observati__Conte__534D60F1] FOREIGN KEY ([ContextId]) REFERENCES [dbo].[Encounter] ([Id]);
+PRINT N'Creating Table [dbo].[PracticionerRole]...';
 
 
 GO
-PRINT N'Creating SqlForeignKeyConstraint [dbo].[FK__Observati__Device]...';
+CREATE TABLE [dbo].[PracticionerRole] (
+    [Id]             UNIQUEIDENTIFIER NOT NULL,
+    [OriginalId]     NVARCHAR (255)   NOT NULL,
+    [Active]         BIT              NULL,
+    [PeriodStart]    DATETIME         NULL,
+    [PeriodEnd]      DATETIME         NULL,
+    [Practicioner]   UNIQUEIDENTIFIER NOT NULL,
+    [Organization]   UNIQUEIDENTIFIER NULL,
+    [SDSJobRoleName] NVARCHAR (100)   NULL,
+    [Speciality]     NVARCHAR (100)   NULL,
+    [Location]       UNIQUEIDENTIFIER NULL,
+    [Telecom]        NVARCHAR (50)    NULL,
+    CONSTRAINT [PK_PracticionerRole] PRIMARY KEY CLUSTERED ([Id] ASC)
+);
 
 
 GO
-WAITFOR DELAY '00:00.010';
-
-ALTER TABLE [dbo].[Observation] WITH NOCHECK
-    ADD CONSTRAINT [FK__Observati__Device] FOREIGN KEY ([Device]) REFERENCES [dbo].[Device] ([Id]);
+PRINT N'Creating Table [dbo].[ProcedureRequest]...';
 
 
 GO
-PRINT N'Creating SqlForeignKeyConstraint [dbo].[FK__Observati__Entity]...';
+CREATE TABLE [dbo].[ProcedureRequest] (
+    [Id]                         UNIQUEIDENTIFIER NOT NULL,
+    [Identifier]                 UNIQUEIDENTIFIER NULL,
+    [Status]                     NVARCHAR (255)   NULL,
+    [Assigner]                   UNIQUEIDENTIFIER NULL,
+    [RequisitionAssigner]        UNIQUEIDENTIFIER NULL,
+    [Category]                   NVARCHAR (255)   NULL,
+    [Code]                       NVARCHAR (255)   NULL,
+    [Subject]                    UNIQUEIDENTIFIER NULL,
+    [Conext]                     UNIQUEIDENTIFIER NULL,
+    [Encounter]                  UNIQUEIDENTIFIER NULL,
+    [RequestingOrganization]     UNIQUEIDENTIFIER NULL,
+    [RequestingPracticioner]     UNIQUEIDENTIFIER NULL,
+    [OnBehalfOf]                 UNIQUEIDENTIFIER NULL,
+    [PerformerOrganization]      UNIQUEIDENTIFIER NULL,
+    [PerformerPracticioner]      UNIQUEIDENTIFIER NULL,
+    [Reason]                     NVARCHAR (255)   NULL,
+    [ReasonReferenceCondition]   UNIQUEIDENTIFIER NULL,
+    [ReasonReferenceObservation] UNIQUEIDENTIFIER NULL,
+    [SupportingInfo]             UNIQUEIDENTIFIER NULL,
+    [Specimen]                   UNIQUEIDENTIFIER NULL,
+    [BodySite]                   NVARCHAR (255)   NULL,
+    [NoteText]                   NVARCHAR (MAX)   NULL,
+    [NoteAuthored]               DATETIME         NULL,
+    [NoteAuthorPatient]          UNIQUEIDENTIFIER NULL,
+    [NoteAuthorPracticioner]     UNIQUEIDENTIFIER NULL,
+    PRIMARY KEY CLUSTERED ([Id] ASC)
+);
 
 
 GO
-WAITFOR DELAY '00:00.010';
-
-ALTER TABLE [dbo].[Observation] WITH NOCHECK
-    ADD CONSTRAINT [FK__Observati__Entity] FOREIGN KEY ([Entityid]) REFERENCES [dbo].[Entity] ([Id]);
+PRINT N'Creating Table [dbo].[Qualification]...';
 
 
 GO
-PRINT N'Creating SqlForeignKeyConstraint [dbo].[FK__Observati__Observation]...';
+CREATE TABLE [dbo].[Qualification] (
+    [Id]         UNIQUEIDENTIFIER NOT NULL,
+    [Use]        NVARCHAR (20)    NULL,
+    [Type]       NVARCHAR (50)    NULL,
+    [System]     NVARCHAR (50)    NULL,
+    [Value]      NVARCHAR (255)   NULL,
+    [FromDate]   DATETIME         NULL,
+    [ToDate]     DATETIME         NULL,
+    [AssignerID] UNIQUEIDENTIFIER NULL,
+    [IssuerID]   UNIQUEIDENTIFIER NULL,
+    PRIMARY KEY CLUSTERED ([Id] ASC)
+);
 
 
 GO
-WAITFOR DELAY '00:00.010';
-
-ALTER TABLE [dbo].[Observation] WITH NOCHECK
-    ADD CONSTRAINT [FK__Observati__Observation] FOREIGN KEY ([RelatedTo]) REFERENCES [dbo].[Observation] ([Id]);
+PRINT N'Creating Table [dbo].[ReferralRequest]...';
 
 
 GO
-PRINT N'Creating SqlForeignKeyConstraint [dbo].[FK__Observati__Perf]...';
+CREATE TABLE [dbo].[ReferralRequest] (
+    [Id]                  UNIQUEIDENTIFIER NOT NULL,
+    [Identifier]          UNIQUEIDENTIFIER NULL,
+    [ActivityDefinition]  UNIQUEIDENTIFIER NULL,
+    [Status]              NVARCHAR (MAX)   NULL,
+    [Intent]              NVARCHAR (MAX)   NULL,
+    [Type]                NVARCHAR (MAX)   NULL,
+    [Priority]            NVARCHAR (MAX)   NULL,
+    [ServiceRequested]    NVARCHAR (MAX)   NULL,
+    [Subject]             UNIQUEIDENTIFIER NULL,
+    [Context]             UNIQUEIDENTIFIER NULL,
+    [OccurrenceDate]      DATETIME         NULL,
+    [OccurrenceDateStart] DATETIME         NULL,
+    [OccurrenceDateEnd]   DATETIME         NULL,
+    [AuthoredOn]          DATETIME         NULL,
+    [Requester]           UNIQUEIDENTIFIER NULL,
+    [OnBehalfOf]          UNIQUEIDENTIFIER NULL,
+    [Recipient]           UNIQUEIDENTIFIER NULL,
+    [Description]         NVARCHAR (MAX)   NULL,
+    [NoteAuthor]          UNIQUEIDENTIFIER NULL,
+    [NoteText]            NVARCHAR (MAX)   NULL,
+    PRIMARY KEY CLUSTERED ([Id] ASC)
+);
 
 
 GO
-WAITFOR DELAY '00:00.010';
-
-ALTER TABLE [dbo].[Observation] WITH NOCHECK
-    ADD CONSTRAINT [FK__Observati__Perf] FOREIGN KEY ([PerformerId]) REFERENCES [dbo].[Entity] ([Id]);
+PRINT N'Creating Table [dbo].[ReferralRequest_BasedOn]...';
 
 
 GO
-PRINT N'Creating SqlForeignKeyConstraint [dbo].[FK_Patient_Address_Patient]...';
+CREATE TABLE [dbo].[ReferralRequest_BasedOn] (
+    [EntityId]          UNIQUEIDENTIFIER NOT NULL,
+    [ReferralRequestId] UNIQUEIDENTIFIER NOT NULL
+);
 
 
 GO
-WAITFOR DELAY '00:00.010';
-
-ALTER TABLE [dbo].[Patient_Address] WITH NOCHECK
-    ADD CONSTRAINT [FK_Patient_Address_Patient] FOREIGN KEY ([PatientId]) REFERENCES [dbo].[Patient] ([Id]);
+PRINT N'Creating Table [dbo].[ReferralRequest_ReasonReference]...';
 
 
 GO
-PRINT N'Creating SqlForeignKeyConstraint [dbo].[FK__Immunizat__Subje__6FE99F9F]...';
+CREATE TABLE [dbo].[ReferralRequest_ReasonReference] (
+    [Entity]          UNIQUEIDENTIFIER NOT NULL,
+    [ReferralRequest] UNIQUEIDENTIFIER NOT NULL
+);
 
 
 GO
-WAITFOR DELAY '00:00.010';
-
-ALTER TABLE [dbo].[Immunization] WITH NOCHECK
-    ADD CONSTRAINT [FK__Immunizat__Subje__6FE99F9F] FOREIGN KEY ([SubjectId]) REFERENCES [dbo].[Patient] ([Id]);
+PRINT N'Creating Table [dbo].[ReferralRequest_RelevantHistory]...';
 
 
 GO
-PRINT N'Creating SqlForeignKeyConstraint [dbo].[FK__Medicatio__Patie__3E1D39E1]...';
+CREATE TABLE [dbo].[ReferralRequest_RelevantHistory] (
+    [Entity]          UNIQUEIDENTIFIER NOT NULL,
+    [ReferralRequest] UNIQUEIDENTIFIER NOT NULL
+);
 
 
 GO
-WAITFOR DELAY '00:00.010';
-
-ALTER TABLE [dbo].[MedicationStatement] WITH NOCHECK
-    ADD CONSTRAINT [FK__Medicatio__Patie__3E1D39E1] FOREIGN KEY ([Subject]) REFERENCES [dbo].[Patient] ([Id]);
+PRINT N'Creating Table [dbo].[ReferralRequest_Replaces]...';
 
 
 GO
-PRINT N'Creating SqlForeignKeyConstraint [dbo].[FK_Compositio_Patient]...';
+CREATE TABLE [dbo].[ReferralRequest_Replaces] (
+    [ReplacingReferralRequestId] UNIQUEIDENTIFIER NOT NULL,
+    [ReferralRequestId]          UNIQUEIDENTIFIER NOT NULL
+);
 
 
 GO
-WAITFOR DELAY '00:00.010';
-
-ALTER TABLE [dbo].[Composition] WITH NOCHECK
-    ADD CONSTRAINT [FK_Compositio_Patient] FOREIGN KEY ([Subject]) REFERENCES [dbo].[Patient] ([Id]);
+PRINT N'Creating Table [dbo].[ReferralRequest_SupportingInfo]...';
 
 
 GO
-PRINT N'Creating SqlForeignKeyConstraint [dbo].[FK_ReferralRequest_Patient]...';
+CREATE TABLE [dbo].[ReferralRequest_SupportingInfo] (
+    [Entity]          UNIQUEIDENTIFIER NOT NULL,
+    [ReferralRequest] UNIQUEIDENTIFIER NOT NULL
+);
 
 
 GO
-WAITFOR DELAY '00:00.010';
-
-ALTER TABLE [dbo].[ReferralRequest] WITH NOCHECK
-    ADD CONSTRAINT [FK_ReferralRequest_Patient] FOREIGN KEY ([Subject]) REFERENCES [dbo].[Patient] ([Id]);
+PRINT N'Creating Table [dbo].[Schedule]...';
 
 
 GO
-PRINT N'Creating SqlForeignKeyConstraint [dbo].[FK__Specimen__Subjec__6FB49575]...';
+CREATE TABLE [dbo].[Schedule] (
+    [Id]                   UNIQUEIDENTIFIER NOT NULL,
+    [PracticionerRole]     NVARCHAR (50)    NULL,
+    [ServiceCategory]      NVARCHAR (50)    NULL,
+    [Speciality]           NVARCHAR (50)    NULL,
+    [PlanningHorizonStart] DATETIME         NULL,
+    [PlanningHorizonEnd]   DATETIME         NULL,
+    [Comment]              NVARCHAR (MAX)   NULL,
+    CONSTRAINT [PK_Schedule] PRIMARY KEY CLUSTERED ([Id] ASC)
+);
 
 
 GO
-WAITFOR DELAY '00:00.010';
-
-ALTER TABLE [dbo].[Specimen] WITH NOCHECK
-    ADD CONSTRAINT [FK__Specimen__Subjec__6FB49575] FOREIGN KEY ([SubjectId]) REFERENCES [dbo].[Patient] ([Id]);
+PRINT N'Creating Table [dbo].[Schedule_Particpant]...';
 
 
 GO
-PRINT N'Creating SqlForeignKeyConstraint [dbo].[FK__Encounter__Patie__412EB0B6]...';
+CREATE TABLE [dbo].[Schedule_Particpant] (
+    [ScheduleId]    UNIQUEIDENTIFIER NOT NULL,
+    [ParticipantId] UNIQUEIDENTIFIER NOT NULL
+);
 
 
 GO
-WAITFOR DELAY '00:00.010';
-
-ALTER TABLE [dbo].[Encounter] WITH NOCHECK
-    ADD CONSTRAINT [FK__Encounter__Patie__412EB0B6] FOREIGN KEY ([PatientGuid]) REFERENCES [dbo].[Patient] ([Id]);
+PRINT N'Creating Table [dbo].[Slot]...';
 
 
 GO
-PRINT N'Creating SqlForeignKeyConstraint [dbo].[FK__AllergyIn__NoteA__31B762FC]...';
+CREATE TABLE [dbo].[Slot] (
+    [Id]              UNIQUEIDENTIFIER NOT NULL,
+    [DeliveryChannel] NVARCHAR (100)   NULL,
+    [IdentifierId]    UNIQUEIDENTIFIER NULL,
+    [ServiceType]     NVARCHAR (100)   NULL,
+    [Speciality]      NVARCHAR (100)   NULL,
+    [ScheduleId]      UNIQUEIDENTIFIER NULL,
+    [Status]          NVARCHAR (100)   NULL,
+    [Start]           DATETIME         NULL,
+    [End]             DATETIME         NULL,
+    [Overbooked]      BIT              NULL,
+    [Comment]         NVARCHAR (255)   NULL,
+    PRIMARY KEY CLUSTERED ([Id] ASC)
+);
 
 
 GO
-WAITFOR DELAY '00:00.010';
+PRINT N'Creating Table [dbo].[Specimen]...';
 
-ALTER TABLE [dbo].[AllergyIntollerance] WITH NOCHECK
+
+GO
+CREATE TABLE [dbo].[Specimen] (
+    [Id]                    UNIQUEIDENTIFIER NOT NULL,
+    [IdentifierId]          UNIQUEIDENTIFIER NULL,
+    [AccessionIdentifierId] UNIQUEIDENTIFIER NULL,
+    [Status]                NVARCHAR (20)    NULL,
+    [Type]                  NVARCHAR (20)    NULL,
+    [SubjectId]             UNIQUEIDENTIFIER NULL,
+    [ReceivedTime]          DATETIME         NULL,
+    [ParentId]              UNIQUEIDENTIFIER NULL,
+    [Request]               UNIQUEIDENTIFIER NULL,
+    [FastingValueCode]      NVARCHAR (20)    NULL,
+    [FastingDurationValue]  DECIMAL (18, 2)  NULL,
+    [CollectorId]           UNIQUEIDENTIFIER NULL,
+    [Collected]             DATETIME         NULL,
+    [CollectedQuantity]     INT              NULL,
+    [CollectionMethod]      NVARCHAR (20)    NULL,
+    [CollectionBodySite]    NVARCHAR (20)    NULL,
+    [ContainerIdentifierId] UNIQUEIDENTIFIER NULL,
+    [SpecimenQuantity]      INT              NULL,
+    [ContainerCapacity]     INT              NULL,
+    [NoteText]              NVARCHAR (MAX)   NULL,
+    [NoteAuthored]          DATETIME         NULL,
+    [NoteAuthorId]          UNIQUEIDENTIFIER NULL,
+    PRIMARY KEY CLUSTERED ([Id] ASC)
+);
+
+
+GO
+PRINT N'Creating Table [dbo].[StructureMap]...';
+
+
+GO
+CREATE TABLE [dbo].[StructureMap] (
+    [Id]                  UNIQUEIDENTIFIER NOT NULL,
+    [Identifier]          UNIQUEIDENTIFIER NULL,
+    [Version]             VARCHAR (255)    NULL,
+    [Name]                VARCHAR (255)    NULL,
+    [Title]               VARCHAR (255)    NULL,
+    [Status]              VARCHAR (255)    NULL,
+    [Experimental]        BIT              NULL,
+    [Date]                DATETIME         NULL,
+    [Publisher]           VARCHAR (255)    NOT NULL,
+    [ContactName]         VARCHAR (255)    NULL,
+    [ContactNumber]       VARCHAR (255)    NULL,
+    [Description]         VARCHAR (255)    NULL,
+    [UseContextCode]      VARCHAR (255)    NULL,
+    [UseContextQuantity]  DECIMAL (9, 2)   NULL,
+    [UseContextRangeHigh] INT              NULL,
+    [UseContextRangeLow]  INT              NULL,
+    [Jurisdiction]        VARCHAR (255)    NULL,
+    [Purpose]             VARCHAR (255)    NULL,
+    [Copyright]           VARCHAR (255)    NULL,
+    [Structure]           VARCHAR (255)    NULL,
+    [Import]              VARCHAR (255)    NULL,
+    PRIMARY KEY CLUSTERED ([Id] ASC)
+);
+
+
+GO
+PRINT N'Creating Table [dbo].[Timing]...';
+
+
+GO
+CREATE TABLE [dbo].[Timing] (
+    [Id]                 UNIQUEIDENTIFIER NOT NULL,
+    [Event]              DATETIME2 (7)    NULL,
+    [BoundsDuration]     DECIMAL (18, 9)  NULL,
+    [BoundsDurationMax]  DECIMAL (18, 9)  NULL,
+    [BoundsDurationUnit] NVARCHAR (50)    NULL,
+    [Count]              INT              NULL,
+    [CountMax]           INT              NULL,
+    [Duration]           DECIMAL (18, 9)  NULL,
+    [DurationMax]        DECIMAL (18, 9)  NULL,
+    [DurationUnit]       NVARCHAR (50)    NULL,
+    [Frequency]          INT              NULL,
+    [FrequencyMax]       INT              NULL,
+    [Period]             DECIMAL (18, 9)  NULL,
+    [PeriodMax]          DECIMAL (18, 9)  NULL,
+    [PeriodUnit]         NVARCHAR (50)    NULL,
+    [DayOfWeek]          NVARCHAR (50)    NULL,
+    [TimeOfDay]          INT              NULL,
+    [When]               NVARCHAR (50)    NULL,
+    [Offset]             INT              NULL,
+    [Code]               NVARCHAR (50)    NULL,
+    PRIMARY KEY CLUSTERED ([Id] ASC)
+);
+
+
+GO
+PRINT N'Creating Foreign Key [dbo].[FK__ActivityD__Locat__0C85DE4D]...';
+
+
+GO
+ALTER TABLE [dbo].[ActivityDefinition]
+    ADD CONSTRAINT [FK__ActivityD__Locat__0C85DE4D] FOREIGN KEY ([LocationId]) REFERENCES [dbo].[Location] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key [dbo].[FK__ActivityD__Produ__72C60C4A]...';
+
+
+GO
+ALTER TABLE [dbo].[ActivityDefinition]
+    ADD CONSTRAINT [FK__ActivityD__Produ__72C60C4A] FOREIGN KEY ([ProductId]) REFERENCES [dbo].[Medication] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key unnamed constraint on [dbo].[ActivityDefinition]...';
+
+
+GO
+ALTER TABLE [dbo].[ActivityDefinition]
+    ADD FOREIGN KEY ([TransformId]) REFERENCES [dbo].[StructureMap] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key unnamed constraint on [dbo].[ActivityDefinition]...';
+
+
+GO
+ALTER TABLE [dbo].[ActivityDefinition]
+    ADD FOREIGN KEY ([DosageId]) REFERENCES [dbo].[Dosage] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key unnamed constraint on [dbo].[ActivityDefinition]...';
+
+
+GO
+ALTER TABLE [dbo].[ActivityDefinition]
+    ADD FOREIGN KEY ([IdentifierId]) REFERENCES [dbo].[Identifier] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key unnamed constraint on [dbo].[ActivityDefinition]...';
+
+
+GO
+ALTER TABLE [dbo].[ActivityDefinition]
+    ADD FOREIGN KEY ([RelatedArtifactId]) REFERENCES [dbo].[Entity] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key [dbo].[FK__AllergyIn__Recor__2FCF1A8A]...';
+
+
+GO
+ALTER TABLE [dbo].[AllergyIntollerance]
+    ADD CONSTRAINT [FK__AllergyIn__Recor__2FCF1A8A] FOREIGN KEY ([Recorder]) REFERENCES [dbo].[Practicioner] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key [dbo].[FK__AllergyIn__NoteA__31B762FC]...';
+
+
+GO
+ALTER TABLE [dbo].[AllergyIntollerance]
     ADD CONSTRAINT [FK__AllergyIn__NoteA__31B762FC] FOREIGN KEY ([NoteAuthor]) REFERENCES [dbo].[Patient] ([Id]);
 
 
 GO
-PRINT N'Creating SqlForeignKeyConstraint [dbo].[FK_Patient_Links_Patient]...';
+PRINT N'Creating Foreign Key [dbo].[FK_AllergyIntollerance_Entity]...';
 
 
 GO
-WAITFOR DELAY '00:00.010';
-
-ALTER TABLE [dbo].[Patient_Links] WITH NOCHECK
-    ADD CONSTRAINT [FK_Patient_Links_Patient] FOREIGN KEY ([PatientId]) REFERENCES [dbo].[Patient] ([Id]);
+ALTER TABLE [dbo].[AllergyIntollerance]
+    ADD CONSTRAINT [FK_AllergyIntollerance_Entity] FOREIGN KEY ([Recorder]) REFERENCES [dbo].[Entity] ([Id]);
 
 
 GO
-PRINT N'Creating SqlForeignKeyConstraint [dbo].[FK_Patient_Practicioner]...';
+PRINT N'Creating Foreign Key [dbo].[FK_AllergyIntollerance_Entity2]...';
 
 
 GO
-WAITFOR DELAY '00:00.010';
-
-ALTER TABLE [dbo].[Patient] WITH NOCHECK
-    ADD CONSTRAINT [FK_Patient_Practicioner] FOREIGN KEY ([Practicioner]) REFERENCES [dbo].[Practicioner] ([Id]);
+ALTER TABLE [dbo].[AllergyIntollerance]
+    ADD CONSTRAINT [FK_AllergyIntollerance_Entity2] FOREIGN KEY ([Asserter]) REFERENCES [dbo].[Entity] ([Id]);
 
 
 GO
-PRINT N'Creating SqlForeignKeyConstraint [dbo].[FK_Patient_Organization1]...';
+PRINT N'Creating Foreign Key [dbo].[FK_AllergyIntollerance_Encounter]...';
 
 
 GO
-WAITFOR DELAY '00:00.010';
-
-ALTER TABLE [dbo].[Patient] WITH NOCHECK
-    ADD CONSTRAINT [FK_Patient_Organization1] FOREIGN KEY ([NominatedPharmacy]) REFERENCES [dbo].[Organization] ([Id]);
+ALTER TABLE [dbo].[AllergyIntollerance]
+    ADD CONSTRAINT [FK_AllergyIntollerance_Encounter] FOREIGN KEY ([Encounter]) REFERENCES [dbo].[Encounter] ([Id]);
 
 
 GO
-PRINT N'Creating SqlForeignKeyConstraint [dbo].[FK_Patient_Links_Patient1]...';
+PRINT N'Creating Foreign Key [dbo].[FK__AllergyIn__Subje__2CF2ADDF]...';
 
 
 GO
-WAITFOR DELAY '00:00.010';
-
-ALTER TABLE [dbo].[Patient_Links] WITH NOCHECK
-    ADD CONSTRAINT [FK_Patient_Links_Patient1] FOREIGN KEY ([LinkedPatient]) REFERENCES [dbo].[Patient] ([Id]);
-
-
-GO
-PRINT N'Creating SqlForeignKeyConstraint [dbo].[FK__AllergyIn__Subje__2CF2ADDF]...';
-
-
-GO
-WAITFOR DELAY '00:00.010';
-
-ALTER TABLE [dbo].[AllergyIntollerance] WITH NOCHECK
+ALTER TABLE [dbo].[AllergyIntollerance]
     ADD CONSTRAINT [FK__AllergyIn__Subje__2CF2ADDF] FOREIGN KEY ([Subject]) REFERENCES [dbo].[Patient] ([Id]);
 
 
 GO
-PRINT N'Creating SqlForeignKeyConstraint [dbo].[FK_Patient_Patient]...';
+PRINT N'Creating Foreign Key [dbo].[FK__AllergyIn__Asser__2DE6D218]...';
 
 
 GO
-WAITFOR DELAY '00:00.010';
-
-ALTER TABLE [dbo].[Patient] WITH NOCHECK
-    ADD CONSTRAINT [FK_Patient_Patient] FOREIGN KEY ([Id]) REFERENCES [dbo].[Patient] ([Id]);
+ALTER TABLE [dbo].[AllergyIntollerance]
+    ADD CONSTRAINT [FK__AllergyIn__Asser__2DE6D218] FOREIGN KEY ([Asserter]) REFERENCES [dbo].[Entity] ([Id]);
 
 
 GO
-PRINT N'Creating SqlForeignKeyConstraint [dbo].[FK__Medicatio__Patie__3A4CA8FD]...';
+PRINT N'Creating Foreign Key [dbo].[FK_AllergyIntollerance_DiagnosticReport]...';
 
 
 GO
-WAITFOR DELAY '00:00.010';
-
-ALTER TABLE [dbo].[MedicationRequest] WITH NOCHECK
-    ADD CONSTRAINT [FK__Medicatio__Patie__3A4CA8FD] FOREIGN KEY ([Subject]) REFERENCES [dbo].[Patient] ([Id]);
+ALTER TABLE [dbo].[AllergyIntollerance]
+    ADD CONSTRAINT [FK_AllergyIntollerance_DiagnosticReport] FOREIGN KEY ([Evidence]) REFERENCES [dbo].[DiagnosticReport] ([Id]);
 
 
 GO
-PRINT N'Creating SqlForeignKeyConstraint [dbo].[FK__Diagnosti__Subje__1EA48E88]...';
+PRINT N'Creating Foreign Key [dbo].[FK__AllergyIn__Ident__2BFE89A6]...';
 
 
 GO
-WAITFOR DELAY '00:00.010';
+ALTER TABLE [dbo].[AllergyIntollerance]
+    ADD CONSTRAINT [FK__AllergyIn__Ident__2BFE89A6] FOREIGN KEY ([Identifier]) REFERENCES [dbo].[Identifier] ([Id]);
 
-ALTER TABLE [dbo].[DiagnosticReport] WITH NOCHECK
+
+GO
+PRINT N'Creating Foreign Key [dbo].[FK_AllergyIntollerance_Entity1]...';
+
+
+GO
+ALTER TABLE [dbo].[AllergyIntollerance]
+    ADD CONSTRAINT [FK_AllergyIntollerance_Entity1] FOREIGN KEY ([NoteAuthor]) REFERENCES [dbo].[Entity] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key [dbo].[FK__Appointme__Booki__17036CC0]...';
+
+
+GO
+ALTER TABLE [dbo].[Appointment]
+    ADD CONSTRAINT [FK__Appointme__Booki__17036CC0] FOREIGN KEY ([BookingOrganizationId]) REFERENCES [dbo].[Organization] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key unnamed constraint on [dbo].[Appointment]...';
+
+
+GO
+ALTER TABLE [dbo].[Appointment]
+    ADD FOREIGN KEY ([IdentifierId]) REFERENCES [dbo].[Identifier] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key [dbo].[FK_Appointment_Participant_Appointment]...';
+
+
+GO
+ALTER TABLE [dbo].[Appointment_Participant]
+    ADD CONSTRAINT [FK_Appointment_Participant_Appointment] FOREIGN KEY ([AppointmentId]) REFERENCES [dbo].[Appointment] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key [dbo].[FK_Appointment_Participant_Participant]...';
+
+
+GO
+ALTER TABLE [dbo].[Appointment_Participant]
+    ADD CONSTRAINT [FK_Appointment_Participant_Participant] FOREIGN KEY ([ParticipantId]) REFERENCES [dbo].[Participant] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key [dbo].[FK_Appointment_Slots_Appointment]...';
+
+
+GO
+ALTER TABLE [dbo].[Appointment_Slots]
+    ADD CONSTRAINT [FK_Appointment_Slots_Appointment] FOREIGN KEY ([AppointmentId]) REFERENCES [dbo].[Appointment] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key [dbo].[FK_Appointment_Slots_Slot]...';
+
+
+GO
+ALTER TABLE [dbo].[Appointment_Slots]
+    ADD CONSTRAINT [FK_Appointment_Slots_Slot] FOREIGN KEY ([SlotId]) REFERENCES [dbo].[Slot] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key [dbo].[FK_Compositio_Encounter]...';
+
+
+GO
+ALTER TABLE [dbo].[Composition]
+    ADD CONSTRAINT [FK_Compositio_Encounter] FOREIGN KEY ([Encounter]) REFERENCES [dbo].[Encounter] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key [dbo].[FK_Compositio_Patient]...';
+
+
+GO
+ALTER TABLE [dbo].[Composition]
+    ADD CONSTRAINT [FK_Compositio_Patient] FOREIGN KEY ([Subject]) REFERENCES [dbo].[Patient] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key [dbo].[FK_Compositio_Identifier]...';
+
+
+GO
+ALTER TABLE [dbo].[Composition]
+    ADD CONSTRAINT [FK_Compositio_Identifier] FOREIGN KEY ([Identifier]) REFERENCES [dbo].[Identifier] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key [dbo].[FK_Compositio_Practicioner]...';
+
+
+GO
+ALTER TABLE [dbo].[Composition]
+    ADD CONSTRAINT [FK_Compositio_Practicioner] FOREIGN KEY ([Author]) REFERENCES [dbo].[Practicioner] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key [dbo].[FK__Condition__NoteA__43D61337]...';
+
+
+GO
+ALTER TABLE [dbo].[Condition]
+    ADD CONSTRAINT [FK__Condition__NoteA__43D61337] FOREIGN KEY ([NoteAuthor]) REFERENCES [dbo].[Entity] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key [dbo].[FK__Condition__Actua__3E1D39E1]...';
+
+
+GO
+ALTER TABLE [dbo].[Condition]
+    ADD CONSTRAINT [FK__Condition__Actua__3E1D39E1] FOREIGN KEY ([ActualProblem]) REFERENCES [dbo].[Entity] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key [dbo].[FK__Condition__Subje__40F9A68C]...';
+
+
+GO
+ALTER TABLE [dbo].[Condition]
+    ADD CONSTRAINT [FK__Condition__Subje__40F9A68C] FOREIGN KEY ([Subject]) REFERENCES [dbo].[Patient] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key [dbo].[FK__Condition__Conte__41EDCAC5]...';
+
+
+GO
+ALTER TABLE [dbo].[Condition]
+    ADD CONSTRAINT [FK__Condition__Conte__41EDCAC5] FOREIGN KEY ([Context]) REFERENCES [dbo].[Encounter] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key [dbo].[FK__Condition__Asser__42E1EEFE]...';
+
+
+GO
+ALTER TABLE [dbo].[Condition]
+    ADD CONSTRAINT [FK__Condition__Asser__42E1EEFE] FOREIGN KEY ([Asserter]) REFERENCES [dbo].[Practicioner] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key [dbo].[FK__Condition__Ident__3D2915A8]...';
+
+
+GO
+ALTER TABLE [dbo].[Condition]
+    ADD CONSTRAINT [FK__Condition__Ident__3D2915A8] FOREIGN KEY ([Identifier]) REFERENCES [dbo].[Identifier] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key [dbo].[FK_Condition_Evidence_Condition]...';
+
+
+GO
+ALTER TABLE [dbo].[Condition_Evidence]
+    ADD CONSTRAINT [FK_Condition_Evidence_Condition] FOREIGN KEY ([ConditionId]) REFERENCES [dbo].[Condition] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key [dbo].[FK_Condition_Evidence_Entity]...';
+
+
+GO
+ALTER TABLE [dbo].[Condition_Evidence]
+    ADD CONSTRAINT [FK_Condition_Evidence_Entity] FOREIGN KEY ([EntityId]) REFERENCES [dbo].[Entity] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key [dbo].[FK_Condition_RelatedClinicalConditions_Condition]...';
+
+
+GO
+ALTER TABLE [dbo].[Condition_RelatedClinicalConditions]
+    ADD CONSTRAINT [FK_Condition_RelatedClinicalConditions_Condition] FOREIGN KEY ([ConditionId]) REFERENCES [dbo].[Condition] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key [dbo].[FK_Condition_RelatedClinicalConditions_Entity]...';
+
+
+GO
+ALTER TABLE [dbo].[Condition_RelatedClinicalConditions]
+    ADD CONSTRAINT [FK_Condition_RelatedClinicalConditions_Entity] FOREIGN KEY ([EntityId]) REFERENCES [dbo].[Entity] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key [dbo].[FK_Condition_RelatedProblems_Condition]...';
+
+
+GO
+ALTER TABLE [dbo].[Condition_RelatedProblems]
+    ADD CONSTRAINT [FK_Condition_RelatedProblems_Condition] FOREIGN KEY ([ConditionId]) REFERENCES [dbo].[Condition] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key [dbo].[FK_Condition_RelatedProblems_Entity]...';
+
+
+GO
+ALTER TABLE [dbo].[Condition_RelatedProblems]
+    ADD CONSTRAINT [FK_Condition_RelatedProblems_Entity] FOREIGN KEY ([EntityId]) REFERENCES [dbo].[Entity] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key [dbo].[FK_Contact_Organization]...';
+
+
+GO
+ALTER TABLE [dbo].[Contact]
+    ADD CONSTRAINT [FK_Contact_Organization] FOREIGN KEY ([OrganizationId]) REFERENCES [dbo].[Organization] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key unnamed constraint on [dbo].[Contact]...';
+
+
+GO
+ALTER TABLE [dbo].[Contact]
+    ADD FOREIGN KEY ([AddressID]) REFERENCES [dbo].[Address] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key [dbo].[FK_Device_PartOf]...';
+
+
+GO
+ALTER TABLE [dbo].[Device]
+    ADD CONSTRAINT [FK_Device_PartOf] FOREIGN KEY ([PartOf]) REFERENCES [dbo].[Organization] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key [dbo].[FK_Device_Address]...';
+
+
+GO
+ALTER TABLE [dbo].[Device]
+    ADD CONSTRAINT [FK_Device_Address] FOREIGN KEY ([Address]) REFERENCES [dbo].[Address] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key [dbo].[FK_Device_Contact]...';
+
+
+GO
+ALTER TABLE [dbo].[Device]
+    ADD CONSTRAINT [FK_Device_Contact] FOREIGN KEY ([Contact]) REFERENCES [dbo].[Contact] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key [dbo].[FK_Device_Owner]...';
+
+
+GO
+ALTER TABLE [dbo].[Device]
+    ADD CONSTRAINT [FK_Device_Owner] FOREIGN KEY ([Owner]) REFERENCES [dbo].[Organization] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key [dbo].[FK_Device_Identifier]...';
+
+
+GO
+ALTER TABLE [dbo].[Device]
+    ADD CONSTRAINT [FK_Device_Identifier] FOREIGN KEY ([Identifier]) REFERENCES [dbo].[Identifier] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key [dbo].[FK_DiagnosticReport_ProcedureRequest]...';
+
+
+GO
+ALTER TABLE [dbo].[DiagnosticReport]
+    ADD CONSTRAINT [FK_DiagnosticReport_ProcedureRequest] FOREIGN KEY ([ProcedureRequest]) REFERENCES [dbo].[ProcedureRequest] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key unnamed constraint on [dbo].[DiagnosticReport]...';
+
+
+GO
+ALTER TABLE [dbo].[DiagnosticReport]
+    ADD FOREIGN KEY ([Specimen]) REFERENCES [dbo].[Specimen] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key [dbo].[FK__Diagnosti__Perfo__681373AD]...';
+
+
+GO
+ALTER TABLE [dbo].[DiagnosticReport]
+    ADD CONSTRAINT [FK__Diagnosti__Perfo__681373AD] FOREIGN KEY ([Performer]) REFERENCES [dbo].[Entity] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key unnamed constraint on [dbo].[DiagnosticReport]...';
+
+
+GO
+ALTER TABLE [dbo].[DiagnosticReport]
+    ADD FOREIGN KEY ([Identifier]) REFERENCES [dbo].[Identifier] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key unnamed constraint on [dbo].[DiagnosticReport]...';
+
+
+GO
+ALTER TABLE [dbo].[DiagnosticReport]
+    ADD FOREIGN KEY ([Result]) REFERENCES [dbo].[Observation] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key [dbo].[FK__Diagnosti__Subje__1EA48E88]...';
+
+
+GO
+ALTER TABLE [dbo].[DiagnosticReport]
     ADD CONSTRAINT [FK__Diagnosti__Subje__1EA48E88] FOREIGN KEY ([Subject]) REFERENCES [dbo].[Patient] ([Id]);
 
 
 GO
-PRINT N'Creating SqlForeignKeyConstraint [dbo].[FK_ProcedureRequest_Subject]...';
+PRINT N'Creating Foreign Key unnamed constraint on [dbo].[DiagnosticReport]...';
 
 
 GO
-WAITFOR DELAY '00:00.010';
-
-ALTER TABLE [dbo].[ProcedureRequest] WITH NOCHECK
-    ADD CONSTRAINT [FK_ProcedureRequest_Subject] FOREIGN KEY ([Subject]) REFERENCES [dbo].[Patient] ([Id]);
+ALTER TABLE [dbo].[DiagnosticReport]
+    ADD FOREIGN KEY ([Encounter]) REFERENCES [dbo].[Encounter] ([Id]);
 
 
 GO
-PRINT N'Creating SqlForeignKeyConstraint [dbo].[FK_Patient_Organization]...';
+PRINT N'Creating Foreign Key [dbo].[FK__Diagnosti__Assig__37703C52]...';
 
 
 GO
-WAITFOR DELAY '00:00.010';
+ALTER TABLE [dbo].[DiagnosticReport]
+    ADD CONSTRAINT [FK__Diagnosti__Assig__37703C52] FOREIGN KEY ([Assigner]) REFERENCES [dbo].[Organization] ([Id]);
 
-ALTER TABLE [dbo].[Patient] WITH NOCHECK
+
+GO
+PRINT N'Creating Foreign Key [dbo].[FK_Dosage_Timing]...';
+
+
+GO
+ALTER TABLE [dbo].[Dosage]
+    ADD CONSTRAINT [FK_Dosage_Timing] FOREIGN KEY ([Timing]) REFERENCES [dbo].[Timing] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key [dbo].[FK__Encounter__Recor__4316F928]...';
+
+
+GO
+ALTER TABLE [dbo].[Encounter]
+    ADD CONSTRAINT [FK__Encounter__Recor__4316F928] FOREIGN KEY ([RecorderId]) REFERENCES [dbo].[Practicioner] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key [dbo].[FK_Encounter_Encounter1]...';
+
+
+GO
+ALTER TABLE [dbo].[Encounter]
+    ADD CONSTRAINT [FK_Encounter_Encounter1] FOREIGN KEY ([EntityId]) REFERENCES [dbo].[Encounter] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key [dbo].[FK_Encounter_Encounter]...';
+
+
+GO
+ALTER TABLE [dbo].[Encounter]
+    ADD CONSTRAINT [FK_Encounter_Encounter] FOREIGN KEY ([Id]) REFERENCES [dbo].[Encounter] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key [dbo].[FK__Encounter__Perfo__4222D4EF]...';
+
+
+GO
+ALTER TABLE [dbo].[Encounter]
+    ADD CONSTRAINT [FK__Encounter__Perfo__4222D4EF] FOREIGN KEY ([PerformerId]) REFERENCES [dbo].[Practicioner] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key [dbo].[FK__Encounter__Patie__412EB0B6]...';
+
+
+GO
+ALTER TABLE [dbo].[Encounter]
+    ADD CONSTRAINT [FK__Encounter__Patie__412EB0B6] FOREIGN KEY ([PatientGuid]) REFERENCES [dbo].[Patient] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key [dbo].[FK_Entity_EntityType]...';
+
+
+GO
+ALTER TABLE [dbo].[Entity]
+    ADD CONSTRAINT [FK_Entity_EntityType] FOREIGN KEY ([EntityType]) REFERENCES [dbo].[EntityType] ([EntityType]);
+
+
+GO
+PRINT N'Creating Foreign Key [dbo].[FK__Equipment__PartO__46E78A0C]...';
+
+
+GO
+ALTER TABLE [dbo].[Equipment]
+    ADD CONSTRAINT [FK__Equipment__PartO__46E78A0C] FOREIGN KEY ([PartOfID]) REFERENCES [dbo].[Organization] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key [dbo].[FK__Equipment__Addre__440B1D61]...';
+
+
+GO
+ALTER TABLE [dbo].[Equipment]
+    ADD CONSTRAINT [FK__Equipment__Addre__440B1D61] FOREIGN KEY ([AddressID]) REFERENCES [dbo].[Address] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key [dbo].[FK_Equipment_Entity]...';
+
+
+GO
+ALTER TABLE [dbo].[Equipment]
+    ADD CONSTRAINT [FK_Equipment_Entity] FOREIGN KEY ([EntityId]) REFERENCES [dbo].[Entity] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key [dbo].[FK__Equipment__Owner__45F365D3]...';
+
+
+GO
+ALTER TABLE [dbo].[Equipment]
+    ADD CONSTRAINT [FK__Equipment__Owner__45F365D3] FOREIGN KEY ([OwnerID]) REFERENCES [dbo].[Organization] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key [dbo].[FK__Equipment__Conta__44FF419A]...';
+
+
+GO
+ALTER TABLE [dbo].[Equipment]
+    ADD CONSTRAINT [FK__Equipment__Conta__44FF419A] FOREIGN KEY ([ContactID]) REFERENCES [dbo].[Contact] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key [dbo].[FK_Immunization_Entity]...';
+
+
+GO
+ALTER TABLE [dbo].[Immunization]
+    ADD CONSTRAINT [FK_Immunization_Entity] FOREIGN KEY ([EntityId]) REFERENCES [dbo].[Entity] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key [dbo].[FK__Immunizat__NoteA__73BA3083]...';
+
+
+GO
+ALTER TABLE [dbo].[Immunization]
+    ADD CONSTRAINT [FK__Immunizat__NoteA__73BA3083] FOREIGN KEY ([NoteAuthorId]) REFERENCES [dbo].[Practicioner] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key [dbo].[FK__Immunizat__Autho__75A278F5]...';
+
+
+GO
+ALTER TABLE [dbo].[Immunization]
+    ADD CONSTRAINT [FK__Immunizat__Autho__75A278F5] FOREIGN KEY ([AuthorityId]) REFERENCES [dbo].[Organization] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key [dbo].[FK__Immunizat__React__74AE54BC]...';
+
+
+GO
+ALTER TABLE [dbo].[Immunization]
+    ADD CONSTRAINT [FK__Immunizat__React__74AE54BC] FOREIGN KEY ([ReactionDetailId]) REFERENCES [dbo].[Observation] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key [dbo].[FK__Immunizat__Locat__72C60C4A]...';
+
+
+GO
+ALTER TABLE [dbo].[Immunization]
+    ADD CONSTRAINT [FK__Immunizat__Locat__72C60C4A] FOREIGN KEY ([LocationId]) REFERENCES [dbo].[Location] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key [dbo].[FK__Immunizat__Subje__6FE99F9F]...';
+
+
+GO
+ALTER TABLE [dbo].[Immunization]
+    ADD CONSTRAINT [FK__Immunizat__Subje__6FE99F9F] FOREIGN KEY ([SubjectId]) REFERENCES [dbo].[Patient] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key [dbo].[FK__Immunizat__Encou__70DDC3D8]...';
+
+
+GO
+ALTER TABLE [dbo].[Immunization]
+    ADD CONSTRAINT [FK__Immunizat__Encou__70DDC3D8] FOREIGN KEY ([EncounterId]) REFERENCES [dbo].[Encounter] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key [dbo].[FK__Immunizat__Actor__71D1E811]...';
+
+
+GO
+ALTER TABLE [dbo].[Immunization]
+    ADD CONSTRAINT [FK__Immunizat__Actor__71D1E811] FOREIGN KEY ([ActorId]) REFERENCES [dbo].[Practicioner] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key [dbo].[FK__Location__PartOf__4D5F7D71]...';
+
+
+GO
+ALTER TABLE [dbo].[Location]
+    ADD CONSTRAINT [FK__Location__PartOf__4D5F7D71] FOREIGN KEY ([PartOfID]) REFERENCES [dbo].[Location] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key [dbo].[FK__Location__Addres__4F47C5E3]...';
+
+
+GO
+ALTER TABLE [dbo].[Location]
+    ADD CONSTRAINT [FK__Location__Addres__4F47C5E3] FOREIGN KEY ([AddressID]) REFERENCES [dbo].[Address] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key [dbo].[FK__Location__Managi__4E53A1AA]...';
+
+
+GO
+ALTER TABLE [dbo].[Location]
+    ADD CONSTRAINT [FK__Location__Managi__4E53A1AA] FOREIGN KEY ([ManagingOrganizationID]) REFERENCES [dbo].[Organization] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key [dbo].[FK_Medication_Organization]...';
+
+
+GO
+ALTER TABLE [dbo].[Medication]
+    ADD CONSTRAINT [FK_Medication_Organization] FOREIGN KEY ([Manufacturer]) REFERENCES [dbo].[Organization] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key unnamed constraint on [dbo].[MedicationDispenseRequest]...';
+
+
+GO
+ALTER TABLE [dbo].[MedicationDispenseRequest]
+    ADD FOREIGN KEY ([PerformerGuid]) REFERENCES [dbo].[Practicioner] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key [dbo].[FK__Medicatio__Patie__3A4CA8FD]...';
+
+
+GO
+ALTER TABLE [dbo].[MedicationRequest]
+    ADD CONSTRAINT [FK__Medicatio__Patie__3A4CA8FD] FOREIGN KEY ([Subject]) REFERENCES [dbo].[Patient] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key [dbo].[FK__Medicatio__Medic__3864608B]...';
+
+
+GO
+ALTER TABLE [dbo].[MedicationRequest]
+    ADD CONSTRAINT [FK__Medicatio__Medic__3864608B] FOREIGN KEY ([MedicationId]) REFERENCES [dbo].[Medication] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key [dbo].[FK__Medicatio__Recor__3B40CD36]...';
+
+
+GO
+ALTER TABLE [dbo].[MedicationRequest]
+    ADD CONSTRAINT [FK__Medicatio__Recor__3B40CD36] FOREIGN KEY ([RecorderGuid]) REFERENCES [dbo].[Practicioner] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key [dbo].[FK__Medicatio__Medic__395884C4]...';
+
+
+GO
+ALTER TABLE [dbo].[MedicationRequest]
+    ADD CONSTRAINT [FK__Medicatio__Medic__395884C4] FOREIGN KEY ([MedicationDispenseRequestId]) REFERENCES [dbo].[MedicationDispenseRequest] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key [dbo].[FK__Medicatio__Medic__3D2915A8]...';
+
+
+GO
+ALTER TABLE [dbo].[MedicationStatement]
+    ADD CONSTRAINT [FK__Medicatio__Medic__3D2915A8] FOREIGN KEY ([MedicationId]) REFERENCES [dbo].[Medication] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key [dbo].[FK__Medicatio__Patie__3E1D39E1]...';
+
+
+GO
+ALTER TABLE [dbo].[MedicationStatement]
+    ADD CONSTRAINT [FK__Medicatio__Patie__3E1D39E1] FOREIGN KEY ([Subject]) REFERENCES [dbo].[Patient] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key [dbo].[FK__Observati__Coding]...';
+
+
+GO
+ALTER TABLE [dbo].[Observation]
+    ADD CONSTRAINT [FK__Observati__Coding] FOREIGN KEY ([Code]) REFERENCES [dbo].[Coding] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key [dbo].[FK__Observati__basedOn]...';
+
+
+GO
+ALTER TABLE [dbo].[Observation]
+    ADD CONSTRAINT [FK__Observati__basedOn] FOREIGN KEY ([BasedOn]) REFERENCES [dbo].[Entity] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key unnamed constraint on [dbo].[Observation]...';
+
+
+GO
+ALTER TABLE [dbo].[Observation]
+    ADD FOREIGN KEY ([PerformerId]) REFERENCES [dbo].[Practicioner] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key [dbo].[FK__Observati__Device]...';
+
+
+GO
+ALTER TABLE [dbo].[Observation]
+    ADD CONSTRAINT [FK__Observati__Device] FOREIGN KEY ([Device]) REFERENCES [dbo].[Device] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key [dbo].[FK__Observati__Conte__534D60F1]...';
+
+
+GO
+ALTER TABLE [dbo].[Observation]
+    ADD CONSTRAINT [FK__Observati__Conte__534D60F1] FOREIGN KEY ([ContextId]) REFERENCES [dbo].[Encounter] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key [dbo].[FK__Observati__Perf]...';
+
+
+GO
+ALTER TABLE [dbo].[Observation]
+    ADD CONSTRAINT [FK__Observati__Perf] FOREIGN KEY ([PerformerId]) REFERENCES [dbo].[Entity] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key [dbo].[FK__Observati__Subje__40F9A68C]...';
+
+
+GO
+ALTER TABLE [dbo].[Observation]
+    ADD CONSTRAINT [FK__Observati__Subje__40F9A68C] FOREIGN KEY ([SubjectId]) REFERENCES [dbo].[Patient] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key [dbo].[FK__Observati__Entity]...';
+
+
+GO
+ALTER TABLE [dbo].[Observation]
+    ADD CONSTRAINT [FK__Observati__Entity] FOREIGN KEY ([Entityid]) REFERENCES [dbo].[Entity] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key [dbo].[FK__Observati__Observation]...';
+
+
+GO
+ALTER TABLE [dbo].[Observation]
+    ADD CONSTRAINT [FK__Observati__Observation] FOREIGN KEY ([RelatedTo]) REFERENCES [dbo].[Observation] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key [dbo].[FK__Organizat__PartO__5BAD9CC8]...';
+
+
+GO
+ALTER TABLE [dbo].[Organization]
+    ADD CONSTRAINT [FK__Organizat__PartO__5BAD9CC8] FOREIGN KEY ([PartOfID]) REFERENCES [dbo].[Organization] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key [dbo].[FK__Organizat__Addre__5AB9788F]...';
+
+
+GO
+ALTER TABLE [dbo].[Organization]
+    ADD CONSTRAINT [FK__Organizat__Addre__5AB9788F] FOREIGN KEY ([AddressID]) REFERENCES [dbo].[Address] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key [dbo].[FK__Organizat__Conta__5CA1C101]...';
+
+
+GO
+ALTER TABLE [dbo].[Organization]
+    ADD CONSTRAINT [FK__Organizat__Conta__5CA1C101] FOREIGN KEY ([ContactID]) REFERENCES [dbo].[Contact] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key [dbo].[FK_Organization_Location]...';
+
+
+GO
+ALTER TABLE [dbo].[Organization]
+    ADD CONSTRAINT [FK_Organization_Location] FOREIGN KEY ([MainLocationID]) REFERENCES [dbo].[Location] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key [dbo].[FK__Participa__Actor__078C1F06]...';
+
+
+GO
+ALTER TABLE [dbo].[Participant]
+    ADD CONSTRAINT [FK__Participa__Actor__078C1F06] FOREIGN KEY ([Actor]) REFERENCES [dbo].[Entity] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key [dbo].[FK_Patient_Patient]...';
+
+
+GO
+ALTER TABLE [dbo].[Patient]
+    ADD CONSTRAINT [FK_Patient_Patient] FOREIGN KEY ([Id]) REFERENCES [dbo].[Patient] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key [dbo].[FK_Patient_Organization1]...';
+
+
+GO
+ALTER TABLE [dbo].[Patient]
+    ADD CONSTRAINT [FK_Patient_Organization1] FOREIGN KEY ([NominatedPharmacy]) REFERENCES [dbo].[Organization] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key [dbo].[FK_Patient_Organization]...';
+
+
+GO
+ALTER TABLE [dbo].[Patient]
     ADD CONSTRAINT [FK_Patient_Organization] FOREIGN KEY ([ManagingOrganization]) REFERENCES [dbo].[Organization] ([Id]);
 
 
 GO
-PRINT N'Creating SqlForeignKeyConstraint [dbo].[FK_Patient_Contacts_Patient]...';
+PRINT N'Creating Foreign Key [dbo].[FK_Patient_Practicioner]...';
 
 
 GO
-WAITFOR DELAY '00:00.010';
+ALTER TABLE [dbo].[Patient]
+    ADD CONSTRAINT [FK_Patient_Practicioner] FOREIGN KEY ([Practicioner]) REFERENCES [dbo].[Practicioner] ([Id]);
 
-ALTER TABLE [dbo].[Patient_Contacts] WITH NOCHECK
+
+GO
+PRINT N'Creating Foreign Key [dbo].[FK_Patient_Address_Patient]...';
+
+
+GO
+ALTER TABLE [dbo].[Patient_Address]
+    ADD CONSTRAINT [FK_Patient_Address_Patient] FOREIGN KEY ([PatientId]) REFERENCES [dbo].[Patient] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key [dbo].[FK_Patient_Address_Address]...';
+
+
+GO
+ALTER TABLE [dbo].[Patient_Address]
+    ADD CONSTRAINT [FK_Patient_Address_Address] FOREIGN KEY ([AddressId]) REFERENCES [dbo].[Address] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key [dbo].[FK_Patient_Contacts_Patient]...';
+
+
+GO
+ALTER TABLE [dbo].[Patient_Contacts]
     ADD CONSTRAINT [FK_Patient_Contacts_Patient] FOREIGN KEY ([PatientId]) REFERENCES [dbo].[Patient] ([Id]);
 
 
 GO
-PRINT N'Creating SqlForeignKeyConstraint [dbo].[FK__Condition__Subje__40F9A68C]...';
+PRINT N'Creating Foreign Key [dbo].[FK_Patient_Contacts_Contact]...';
 
 
 GO
-WAITFOR DELAY '00:00.010';
+ALTER TABLE [dbo].[Patient_Contacts]
+    ADD CONSTRAINT [FK_Patient_Contacts_Contact] FOREIGN KEY ([ContactId]) REFERENCES [dbo].[Contact] ([Id]);
 
-ALTER TABLE [dbo].[Condition] WITH NOCHECK
-    ADD CONSTRAINT [FK__Condition__Subje__40F9A68C] FOREIGN KEY ([Subject]) REFERENCES [dbo].[Patient] ([Id]);
+
+GO
+PRINT N'Creating Foreign Key [dbo].[FK_Patient_Links_Patient1]...';
+
+
+GO
+ALTER TABLE [dbo].[Patient_Links]
+    ADD CONSTRAINT [FK_Patient_Links_Patient1] FOREIGN KEY ([LinkedPatient]) REFERENCES [dbo].[Patient] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key [dbo].[FK_Patient_Links_Patient]...';
+
+
+GO
+ALTER TABLE [dbo].[Patient_Links]
+    ADD CONSTRAINT [FK_Patient_Links_Patient] FOREIGN KEY ([PatientId]) REFERENCES [dbo].[Patient] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key [dbo].[FK_Patient_Links_Contact]...';
+
+
+GO
+ALTER TABLE [dbo].[Patient_Links]
+    ADD CONSTRAINT [FK_Patient_Links_Contact] FOREIGN KEY ([LinkedContact]) REFERENCES [dbo].[Contact] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key unnamed constraint on [dbo].[Practicioner]...';
+
+
+GO
+ALTER TABLE [dbo].[Practicioner]
+    ADD FOREIGN KEY ([AddressID]) REFERENCES [dbo].[Address] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key [dbo].[FK_Practicioner_Address_Address]...';
+
+
+GO
+ALTER TABLE [dbo].[Practicioner_Address]
+    ADD CONSTRAINT [FK_Practicioner_Address_Address] FOREIGN KEY ([AddressId]) REFERENCES [dbo].[Address] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key [dbo].[FK_Practicioner_Address_Practicioner]...';
+
+
+GO
+ALTER TABLE [dbo].[Practicioner_Address]
+    ADD CONSTRAINT [FK_Practicioner_Address_Practicioner] FOREIGN KEY ([PracticionerId]) REFERENCES [dbo].[Practicioner] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key [dbo].[FK_PracticionerRole_Practicioner]...';
+
+
+GO
+ALTER TABLE [dbo].[PracticionerRole]
+    ADD CONSTRAINT [FK_PracticionerRole_Practicioner] FOREIGN KEY ([Practicioner]) REFERENCES [dbo].[Practicioner] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key [dbo].[FK_PracticionerRole_Location]...';
+
+
+GO
+ALTER TABLE [dbo].[PracticionerRole]
+    ADD CONSTRAINT [FK_PracticionerRole_Location] FOREIGN KEY ([Location]) REFERENCES [dbo].[Location] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key [dbo].[FK_PracticionerRole_Organization]...';
+
+
+GO
+ALTER TABLE [dbo].[PracticionerRole]
+    ADD CONSTRAINT [FK_PracticionerRole_Organization] FOREIGN KEY ([Organization]) REFERENCES [dbo].[Organization] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key [dbo].[FK_ProcedureRequest_OnBehalfOf]...';
+
+
+GO
+ALTER TABLE [dbo].[ProcedureRequest]
+    ADD CONSTRAINT [FK_ProcedureRequest_OnBehalfOf] FOREIGN KEY ([OnBehalfOf]) REFERENCES [dbo].[Organization] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key [dbo].[FK_ProcedureRequest_ConextE]...';
+
+
+GO
+ALTER TABLE [dbo].[ProcedureRequest]
+    ADD CONSTRAINT [FK_ProcedureRequest_ConextE] FOREIGN KEY ([Conext]) REFERENCES [dbo].[Entity] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key [dbo].[FK_ProcedureRequest_Encounter]...';
+
+
+GO
+ALTER TABLE [dbo].[ProcedureRequest]
+    ADD CONSTRAINT [FK_ProcedureRequest_Encounter] FOREIGN KEY ([Encounter]) REFERENCES [dbo].[Encounter] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key [dbo].[FK_ProcedureRequest_RequestingOrganization]...';
+
+
+GO
+ALTER TABLE [dbo].[ProcedureRequest]
+    ADD CONSTRAINT [FK_ProcedureRequest_RequestingOrganization] FOREIGN KEY ([RequestingOrganization]) REFERENCES [dbo].[Organization] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key [dbo].[FK_ProcedureRequest_Assigner]...';
+
+
+GO
+ALTER TABLE [dbo].[ProcedureRequest]
+    ADD CONSTRAINT [FK_ProcedureRequest_Assigner] FOREIGN KEY ([Assigner]) REFERENCES [dbo].[Organization] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key [dbo].[FK_ProcedureRequest_RequestingPracticioner]...';
+
+
+GO
+ALTER TABLE [dbo].[ProcedureRequest]
+    ADD CONSTRAINT [FK_ProcedureRequest_RequestingPracticioner] FOREIGN KEY ([RequestingPracticioner]) REFERENCES [dbo].[Practicioner] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key [dbo].[FK_ProcedureRequest_Subject]...';
+
+
+GO
+ALTER TABLE [dbo].[ProcedureRequest]
+    ADD CONSTRAINT [FK_ProcedureRequest_Subject] FOREIGN KEY ([Subject]) REFERENCES [dbo].[Patient] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key [dbo].[FK_ProcedureRequest_RequisitionAssigner]...';
+
+
+GO
+ALTER TABLE [dbo].[ProcedureRequest]
+    ADD CONSTRAINT [FK_ProcedureRequest_RequisitionAssigner] FOREIGN KEY ([RequisitionAssigner]) REFERENCES [dbo].[Organization] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key [dbo].[FK_ProcedureRequest_Identifier]...';
+
+
+GO
+ALTER TABLE [dbo].[ProcedureRequest]
+    ADD CONSTRAINT [FK_ProcedureRequest_Identifier] FOREIGN KEY ([Identifier]) REFERENCES [dbo].[Identifier] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key [dbo].[FK__Qualifica__Assig__76619304]...';
+
+
+GO
+ALTER TABLE [dbo].[Qualification]
+    ADD CONSTRAINT [FK__Qualifica__Assig__76619304] FOREIGN KEY ([AssignerID]) REFERENCES [dbo].[Organization] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key [dbo].[FK__Qualifica__Issue__756D6ECB]...';
+
+
+GO
+ALTER TABLE [dbo].[Qualification]
+    ADD CONSTRAINT [FK__Qualifica__Issue__756D6ECB] FOREIGN KEY ([IssuerID]) REFERENCES [dbo].[Organization] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key [dbo].[FK_ReferralRequest_Entity]...';
+
+
+GO
+ALTER TABLE [dbo].[ReferralRequest]
+    ADD CONSTRAINT [FK_ReferralRequest_Entity] FOREIGN KEY ([Context]) REFERENCES [dbo].[Entity] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key [dbo].[FK_ReferralRequest_Entity1]...';
+
+
+GO
+ALTER TABLE [dbo].[ReferralRequest]
+    ADD CONSTRAINT [FK_ReferralRequest_Entity1] FOREIGN KEY ([Requester]) REFERENCES [dbo].[Entity] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key [dbo].[FK_ReferralRequest_Patient]...';
+
+
+GO
+ALTER TABLE [dbo].[ReferralRequest]
+    ADD CONSTRAINT [FK_ReferralRequest_Patient] FOREIGN KEY ([Subject]) REFERENCES [dbo].[Patient] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key [dbo].[FK_ReferralRequest_Entity2]...';
+
+
+GO
+ALTER TABLE [dbo].[ReferralRequest]
+    ADD CONSTRAINT [FK_ReferralRequest_Entity2] FOREIGN KEY ([Recipient]) REFERENCES [dbo].[Entity] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key [dbo].[FK_ReferralRequest_Organization]...';
+
+
+GO
+ALTER TABLE [dbo].[ReferralRequest]
+    ADD CONSTRAINT [FK_ReferralRequest_Organization] FOREIGN KEY ([OnBehalfOf]) REFERENCES [dbo].[Organization] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key [dbo].[FK_ReferralRequest_Entity3]...';
+
+
+GO
+ALTER TABLE [dbo].[ReferralRequest]
+    ADD CONSTRAINT [FK_ReferralRequest_Entity3] FOREIGN KEY ([NoteAuthor]) REFERENCES [dbo].[Entity] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key [dbo].[FK_ReferralRequest_BasedOn_Entity]...';
+
+
+GO
+ALTER TABLE [dbo].[ReferralRequest_BasedOn]
+    ADD CONSTRAINT [FK_ReferralRequest_BasedOn_Entity] FOREIGN KEY ([EntityId]) REFERENCES [dbo].[Entity] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key [dbo].[FK_ReferralRequest_BasedOn_ReferralRequest]...';
+
+
+GO
+ALTER TABLE [dbo].[ReferralRequest_BasedOn]
+    ADD CONSTRAINT [FK_ReferralRequest_BasedOn_ReferralRequest] FOREIGN KEY ([ReferralRequestId]) REFERENCES [dbo].[ReferralRequest] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key [dbo].[FK_ReferralRequest_ReasonReference_ReferralRequest]...';
+
+
+GO
+ALTER TABLE [dbo].[ReferralRequest_ReasonReference]
+    ADD CONSTRAINT [FK_ReferralRequest_ReasonReference_ReferralRequest] FOREIGN KEY ([ReferralRequest]) REFERENCES [dbo].[ReferralRequest] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key [dbo].[FK_ReferralRequest_ReasonReference_Entity]...';
+
+
+GO
+ALTER TABLE [dbo].[ReferralRequest_ReasonReference]
+    ADD CONSTRAINT [FK_ReferralRequest_ReasonReference_Entity] FOREIGN KEY ([Entity]) REFERENCES [dbo].[Entity] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key [dbo].[FK_ReferralRequest_RelevantHistory_ReferralRequest]...';
+
+
+GO
+ALTER TABLE [dbo].[ReferralRequest_RelevantHistory]
+    ADD CONSTRAINT [FK_ReferralRequest_RelevantHistory_ReferralRequest] FOREIGN KEY ([ReferralRequest]) REFERENCES [dbo].[ReferralRequest] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key [dbo].[FK_ReferralRequest_RelevantHistory_Entity]...';
+
+
+GO
+ALTER TABLE [dbo].[ReferralRequest_RelevantHistory]
+    ADD CONSTRAINT [FK_ReferralRequest_RelevantHistory_Entity] FOREIGN KEY ([Entity]) REFERENCES [dbo].[Entity] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key [dbo].[FK_ReferralRequest_Replaces_ReferralRequest]...';
+
+
+GO
+ALTER TABLE [dbo].[ReferralRequest_Replaces]
+    ADD CONSTRAINT [FK_ReferralRequest_Replaces_ReferralRequest] FOREIGN KEY ([ReplacingReferralRequestId]) REFERENCES [dbo].[ReferralRequest] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key [dbo].[FK_ReferralRequest_Replaces_ReferralRequest1]...';
+
+
+GO
+ALTER TABLE [dbo].[ReferralRequest_Replaces]
+    ADD CONSTRAINT [FK_ReferralRequest_Replaces_ReferralRequest1] FOREIGN KEY ([ReferralRequestId]) REFERENCES [dbo].[ReferralRequest] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key [dbo].[FK_ReferralRequest_SupportingInfo_ReferralRequest]...';
+
+
+GO
+ALTER TABLE [dbo].[ReferralRequest_SupportingInfo]
+    ADD CONSTRAINT [FK_ReferralRequest_SupportingInfo_ReferralRequest] FOREIGN KEY ([ReferralRequest]) REFERENCES [dbo].[ReferralRequest] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key [dbo].[FK_ReferralRequest_SupportingInfo_Entity]...';
+
+
+GO
+ALTER TABLE [dbo].[ReferralRequest_SupportingInfo]
+    ADD CONSTRAINT [FK_ReferralRequest_SupportingInfo_Entity] FOREIGN KEY ([Entity]) REFERENCES [dbo].[Entity] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key [dbo].[FK_Schedule_Particpant_Participant]...';
+
+
+GO
+ALTER TABLE [dbo].[Schedule_Particpant]
+    ADD CONSTRAINT [FK_Schedule_Particpant_Participant] FOREIGN KEY ([ParticipantId]) REFERENCES [dbo].[Participant] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key [dbo].[FK_Schedule_Particpant_Schedule]...';
+
+
+GO
+ALTER TABLE [dbo].[Schedule_Particpant]
+    ADD CONSTRAINT [FK_Schedule_Particpant_Schedule] FOREIGN KEY ([ScheduleId]) REFERENCES [dbo].[Schedule] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key unnamed constraint on [dbo].[Slot]...';
+
+
+GO
+ALTER TABLE [dbo].[Slot]
+    ADD FOREIGN KEY ([IdentifierId]) REFERENCES [dbo].[Identifier] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key unnamed constraint on [dbo].[Slot]...';
+
+
+GO
+ALTER TABLE [dbo].[Slot]
+    ADD FOREIGN KEY ([ScheduleId]) REFERENCES [dbo].[Schedule] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key unnamed constraint on [dbo].[Specimen]...';
+
+
+GO
+ALTER TABLE [dbo].[Specimen]
+    ADD FOREIGN KEY ([NoteAuthorId]) REFERENCES [dbo].[Entity] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key unnamed constraint on [dbo].[Specimen]...';
+
+
+GO
+ALTER TABLE [dbo].[Specimen]
+    ADD FOREIGN KEY ([IdentifierId]) REFERENCES [dbo].[Identifier] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key unnamed constraint on [dbo].[Specimen]...';
+
+
+GO
+ALTER TABLE [dbo].[Specimen]
+    ADD FOREIGN KEY ([CollectorId]) REFERENCES [dbo].[Practicioner] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key unnamed constraint on [dbo].[Specimen]...';
+
+
+GO
+ALTER TABLE [dbo].[Specimen]
+    ADD FOREIGN KEY ([ContainerIdentifierId]) REFERENCES [dbo].[Identifier] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key [dbo].[FK_Specimen_ProcedureRequest]...';
+
+
+GO
+ALTER TABLE [dbo].[Specimen]
+    ADD CONSTRAINT [FK_Specimen_ProcedureRequest] FOREIGN KEY ([Request]) REFERENCES [dbo].[ProcedureRequest] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key unnamed constraint on [dbo].[Specimen]...';
+
+
+GO
+ALTER TABLE [dbo].[Specimen]
+    ADD FOREIGN KEY ([AccessionIdentifierId]) REFERENCES [dbo].[Identifier] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key unnamed constraint on [dbo].[Specimen]...';
+
+
+GO
+ALTER TABLE [dbo].[Specimen]
+    ADD FOREIGN KEY ([ParentId]) REFERENCES [dbo].[Specimen] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key [dbo].[FK__Specimen__Subjec__6FB49575]...';
+
+
+GO
+ALTER TABLE [dbo].[Specimen]
+    ADD CONSTRAINT [FK__Specimen__Subjec__6FB49575] FOREIGN KEY ([SubjectId]) REFERENCES [dbo].[Patient] ([Id]);
+
+
+GO
+PRINT N'Creating Foreign Key [dbo].[FK_StructureMap_Identifier]...';
+
+
+GO
+ALTER TABLE [dbo].[StructureMap]
+    ADD CONSTRAINT [FK_StructureMap_Identifier] FOREIGN KEY ([Identifier]) REFERENCES [dbo].[Identifier] ([Id]);
 
 
 GO
@@ -781,15 +2846,15 @@ Post-Deployment Script Template
 --------------------------------------------------------------------------------------
 */
 
-IF NOT EXISTS (SELECT * FROM [dbo].[EntityType])
 BEGIN
 	-- Disable constraints for all tables:
 	EXEC sp_msforeachtable 'ALTER TABLE ? NOCHECK CONSTRAINT all'
-
+    DELETE FROM[dbo].[EntityType]
 	INSERT [dbo].[EntityType] ([EntityType], [EntityName]) VALUES (1,N'Organization')
 	INSERT [dbo].[EntityType] ([EntityType], [EntityName]) VALUES (2,N'Location')
 	INSERT [dbo].[EntityType] ([EntityType], [EntityName]) VALUES (3,N'Patient')
 	INSERT [dbo].[EntityType] ([EntityType], [EntityName]) VALUES (4,N'Practitioner')
+	INSERT [dbo].[EntityType] ([EntityType], [EntityName]) VALUES (5,N'Observation')
 	
 	-- Re-enable constraints for all tables:
 	EXEC sp_msforeachtable 'ALTER TABLE ? WITH CHECK CHECK CONSTRAINT all';	
@@ -798,132 +2863,21 @@ END
 GO
 
 GO
-PRINT N'Checking existing data against newly created constraints';
+DECLARE @VarDecimalSupported AS BIT;
 
+SELECT @VarDecimalSupported = 0;
 
-GO
-USE [$(DatabaseName)];
+IF ((ServerProperty(N'EngineEdition') = 3)
+    AND (((@@microsoftversion / power(2, 24) = 9)
+          AND (@@microsoftversion & 0xffff >= 3024))
+         OR ((@@microsoftversion / power(2, 24) = 10)
+             AND (@@microsoftversion & 0xffff >= 1600))))
+    SELECT @VarDecimalSupported = 1;
 
-
-GO
-ALTER TABLE [dbo].[Immunization] WITH CHECK CHECK CONSTRAINT [FK__Immunizat__React__74AE54BC];
-
-ALTER TABLE [dbo].[Patient_Address] WITH CHECK CHECK CONSTRAINT [FK_Patient_Address_Patient];
-
-ALTER TABLE [dbo].[Immunization] WITH CHECK CHECK CONSTRAINT [FK__Immunizat__Subje__6FE99F9F];
-
-ALTER TABLE [dbo].[MedicationStatement] WITH CHECK CHECK CONSTRAINT [FK__Medicatio__Patie__3E1D39E1];
-
-ALTER TABLE [dbo].[Composition] WITH CHECK CHECK CONSTRAINT [FK_Compositio_Patient];
-
-ALTER TABLE [dbo].[ReferralRequest] WITH CHECK CHECK CONSTRAINT [FK_ReferralRequest_Patient];
-
-ALTER TABLE [dbo].[Specimen] WITH CHECK CHECK CONSTRAINT [FK__Specimen__Subjec__6FB49575];
-
-ALTER TABLE [dbo].[Encounter] WITH CHECK CHECK CONSTRAINT [FK__Encounter__Patie__412EB0B6];
-
-ALTER TABLE [dbo].[AllergyIntollerance] WITH CHECK CHECK CONSTRAINT [FK__AllergyIn__NoteA__31B762FC];
-
-ALTER TABLE [dbo].[Patient_Links] WITH CHECK CHECK CONSTRAINT [FK_Patient_Links_Patient];
-
-ALTER TABLE [dbo].[Patient] WITH CHECK CHECK CONSTRAINT [FK_Patient_Practicioner];
-
-ALTER TABLE [dbo].[Patient] WITH CHECK CHECK CONSTRAINT [FK_Patient_Organization1];
-
-ALTER TABLE [dbo].[Patient_Links] WITH CHECK CHECK CONSTRAINT [FK_Patient_Links_Patient1];
-
-ALTER TABLE [dbo].[AllergyIntollerance] WITH CHECK CHECK CONSTRAINT [FK__AllergyIn__Subje__2CF2ADDF];
-
-ALTER TABLE [dbo].[Patient] WITH CHECK CHECK CONSTRAINT [FK_Patient_Patient];
-
-ALTER TABLE [dbo].[MedicationRequest] WITH CHECK CHECK CONSTRAINT [FK__Medicatio__Patie__3A4CA8FD];
-
-ALTER TABLE [dbo].[ProcedureRequest] WITH CHECK CHECK CONSTRAINT [FK_ProcedureRequest_Subject];
-
-ALTER TABLE [dbo].[Patient] WITH CHECK CHECK CONSTRAINT [FK_Patient_Organization];
-
-ALTER TABLE [dbo].[Patient_Contacts] WITH CHECK CHECK CONSTRAINT [FK_Patient_Contacts_Patient];
-
-ALTER TABLE [dbo].[Condition] WITH CHECK CHECK CONSTRAINT [FK__Condition__Subje__40F9A68C];
-
-
-GO
-CREATE TABLE [#__checkStatus] (
-    id           INT            IDENTITY (1, 1) PRIMARY KEY CLUSTERED,
-    [Schema]     NVARCHAR (256),
-    [Table]      NVARCHAR (256),
-    [Constraint] NVARCHAR (256)
-);
-
-SET NOCOUNT ON;
-
-DECLARE tableconstraintnames CURSOR LOCAL FORWARD_ONLY
-    FOR SELECT SCHEMA_NAME([schema_id]),
-               OBJECT_NAME([parent_object_id]),
-               [name],
-               0
-        FROM   [sys].[objects]
-        WHERE  [parent_object_id] IN (OBJECT_ID(N'dbo.Observation'), OBJECT_ID(N'dbo.DiagnosticReport'))
-               AND [type] IN (N'F', N'C')
-                   AND [object_id] IN (SELECT [object_id]
-                                       FROM   [sys].[check_constraints]
-                                       WHERE  [is_not_trusted] <> 0
-                                              AND [is_disabled] = 0
-                                       UNION
-                                       SELECT [object_id]
-                                       FROM   [sys].[foreign_keys]
-                                       WHERE  [is_not_trusted] <> 0
-                                              AND [is_disabled] = 0);
-
-DECLARE @schemaname AS NVARCHAR (256);
-
-DECLARE @tablename AS NVARCHAR (256);
-
-DECLARE @checkname AS NVARCHAR (256);
-
-DECLARE @is_not_trusted AS INT;
-
-DECLARE @statement AS NVARCHAR (1024);
-
-BEGIN TRY
-    OPEN tableconstraintnames;
-    FETCH tableconstraintnames INTO @schemaname, @tablename, @checkname, @is_not_trusted;
-    WHILE @@fetch_status = 0
-        BEGIN
-            PRINT N'Checking constraint: ' + @checkname + N' [' + @schemaname + N'].[' + @tablename + N']';
-            SET @statement = N'ALTER TABLE [' + @schemaname + N'].[' + @tablename + N'] WITH ' + CASE @is_not_trusted WHEN 0 THEN N'CHECK' ELSE N'NOCHECK' END + N' CHECK CONSTRAINT [' + @checkname + N']';
-            BEGIN TRY
-                EXECUTE [sp_executesql] @statement;
-            END TRY
-            BEGIN CATCH
-                INSERT  [#__checkStatus] ([Schema], [Table], [Constraint])
-                VALUES                  (@schemaname, @tablename, @checkname);
-            END CATCH
-            FETCH tableconstraintnames INTO @schemaname, @tablename, @checkname, @is_not_trusted;
-        END
-END TRY
-BEGIN CATCH
-    PRINT ERROR_MESSAGE();
-END CATCH
-
-IF CURSOR_STATUS(N'LOCAL', N'tableconstraintnames') >= 0
-    CLOSE tableconstraintnames;
-
-IF CURSOR_STATUS(N'LOCAL', N'tableconstraintnames') = -1
-    DEALLOCATE tableconstraintnames;
-
-SELECT N'Constraint verification failed:' + [Schema] + N'.' + [Table] + N',' + [Constraint]
-FROM   [#__checkStatus];
-
-IF @@ROWCOUNT > 0
+IF (@VarDecimalSupported > 0)
     BEGIN
-        DROP TABLE [#__checkStatus];
-        RAISERROR (N'An error occurred while verifying constraints', 16, 127);
+        EXECUTE sp_db_vardecimal_storage_format N'$(DatabaseName)', 'ON';
     END
-
-SET NOCOUNT OFF;
-
-DROP TABLE [#__checkStatus];
 
 
 GO

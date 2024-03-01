@@ -37,7 +37,7 @@ public class GPConnectLocation : Location
             PhysicalType = this.PhysicalType?.Text,
             
         };
-        if (this.Address.Any())
+        if (this.Address is not null && this.Address.Any())
             dto.Address = new AddressDTO(this.Address);
         if(this.ManagingOrganization is not null)
             dto.ManagingOrganization = _organizations.FirstOrDefault(x=> x.OriginalId == ReferenceHelper.GetId(this.ManagingOrganization.Reference));

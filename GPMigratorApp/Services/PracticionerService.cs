@@ -38,7 +38,7 @@ public class PracticionerService: IPracticionerService
                 existingRecord.GivenName = practicioner.GivenName;
                 existingRecord.MiddleNames = practicioner.MiddleNames;
                 existingRecord.Surname = practicioner.Surname;
-                existingRecord.Sex = practicioner.Sex;
+                existingRecord.Gender = practicioner.Gender;
                 existingRecord.Address = practicioner.Address;
 
                 await practicionerCommand.UpdatePracticionerAsync(existingRecord, cancellationToken, transaction);
